@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <button id ="btn">表示する</button>
+        <ul id="list"></ul>
+    </body>
+    <script>
+        const users = [
+            {name: "Taro", age: 18},
+            {name: "Hanako", age: 22},
+            {name: "Ken", age: 30},
+            {name: "Yuki", age: 15},
+        ];
+    
+        const btn = document.getElementById("btn");
+        btn.addEventListener("click" ,function(){
+        const adult = users.filter(user => user.age >= 20);
+        const list = document.getElementById("list");
+        adult.forEach(user => {
+            const li = document.createElement("li")
+            li.textContent = `${user.name}(${user.age})`;
+            list.appendChild(li);
+        })
+
+        })
+
+    </script>
+</html>
