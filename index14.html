@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="input">
+        <button class="btn">表示</button>
+        <p class="result"></p>
+    </body>
+    <script>
+        const text = document.querySelector(".input");
+        const btn = document.querySelector(".btn");
+        const result = document.querySelector(".result");
+        btn.addEventListener("click" , function(){
+            const p = document.createElement("p");
+            p.textContent = text.value;
+            result.appendChild(p);
+            text.value ="" ;
+        })
+    </script>
+</html>

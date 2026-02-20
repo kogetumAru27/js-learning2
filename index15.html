@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <button class="btn">追加</button>
+        <ul class="list"></ul>
+    </body>
+    <script>
+        const btn = document.querySelector(".btn");
+        const list =document.querySelector(".list");
+        btn.addEventListener("click" , function(){
+            const li = document.createElement("li");
+            list.appendChild(li);
+            li.addEventListener("click" ,function(){
+                li.remove();
+            })
+        })
+    </script>
+</html>
