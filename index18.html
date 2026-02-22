@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <ul class="list">
+            <li>パソコン</li>
+            <li>マウス</li>
+            <li>キーボード</li>
+            <li>画面</li>
+        </ul>
+    </body>
+    <script>
+        const list = document.querySelector(".list");
+        list.addEventListener("click",function(e){
+           if(e.target.tagName === "LI"){
+            e.target.remove();
+           }
+        });
+ 
+    </script>
+</html>

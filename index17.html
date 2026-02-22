@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <button class="btn">表示</button>
+        <p class="text">こんにちは</p>
+    </body>
+    <script>
+        const btn = document.querySelector(".btn");
+        const text = document.querySelector(".text");
+        btn.addEventListener("click",function(){
+           if(text.textContent === "こんにちは"){
+             text.textContent ="こんばんは"
+           }else{
+            text.textContent = "こんにちは"
+           }
+        });
+    </script>
+</html>

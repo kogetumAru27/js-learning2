@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="input">
+        <button class="btn">追加</button>
+        <div class="list"></div>
+    </body>
+    <script>
+        const input = document.querySelector(".input");
+        const btn = document.querySelector(".btn");
+        const list = document.querySelector(".list");
+        btn.addEventListener("click", function(){
+            if(input.value === "")return;
+            const p =document.createElement("p");
+            p.textContent = input.value.toUpperCase();
+            list.appendChild(p);
+            input.value="";
+        });
+    </script>
+</html>
