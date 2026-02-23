@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <button class="btn">追加</button>
+       <ul class="list"></ul>
+    </body>
+    <script>
+        const text = document.querySelector(".text");
+        const btn = document.querySelector(".btn");
+        const list = document.querySelector(".list");
+        btn.addEventListener("click", function(){
+            if(text.value.trim() === "")return;
+            const li = document.createElement("li");
+            const span = document.createElement("span");
+            const delete_btn = document.createElement("button");
+            const comp_btn = document.createElement("button");
+            span.textContent = text.value.toUpperCase();
+            comp_btn.classList.add("complete");
+            delete_btn.classList.add("delete");
+            comp_btn.textContent = "完了";
+            delete_btn.textContent = "削除";
+            li.appendChild(span);
+            li.appendChild(comp_btn);
+            li.appendChild(delete_btn);
+            list.appendChild(li);
+            text.value = "";
+        })
+        list.addEventListener("click" ,function(e){
+            if(e.target.tagName === "SPAN"){
+                if(e.target.textContent === e.target.textContent.toUpperCase()){
+                    e.target.textContent = e.target.textContent.toLowerCase()
+                }else{
+                    e.target.textContent = e.target.textContent.toUpperCase()
+                }
+            }
+            if(e.target.classList.contains("complete")){
+                const span = e.target.parentElement.querySelector("span");
+                span.classList.toggle("done");
+            }
+            if(e.target.classList.contains("delete")){
+                e.target.parentElement.remove();
+            }
+        })
+    </script>
+    <style>
+        .done{
+            text-decoration: line-through;
+        }
+    </style>
