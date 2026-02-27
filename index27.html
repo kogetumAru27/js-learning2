@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <button class="btn">追加</button>
+        <button class="showAll">全て</button>
+        <button class="comp">完了</button>
+        <button class="delt">未完了</button>
+        <ul class="list"></ul>
+        <div class="counter"></div>
+    </body>
+    <script>
+        const text = document.querySelector(".text");
+        const btn = document.querySelector(".btn");
+        const comp_Btn = document.querySelector(".comp");
+        const dlt_Btn = document.querySelector(".delt");
+        const all_btn = document.querySelector(".showAll");
+        const list = document.querySelector(".list");
+        const counter = document.querySelector(".counter");
+        text.addEventListener("keydown",function(e){
+            if(e.key === "Enter"){
+                addTask();
+            }
+        });
+        function uppdateCount(){
+            const items = document.querySelectorAll("li");
+            let count = 0;
+            items.forEach(function(item){
+                if(!item.classList.contains("done")){
+                    count++;
+                }
+                counter.textContent = "未完了タスク" + count;
+            })
+
+        }
+        function addTask(){
+            if(text.value.trim() === "")return;
+            const li = document.createElement("li")
+            const span = document.createElement("span");
+            const delt_btn = document.createElement("button");
+            const comp_btn = document.createElement("button");
+            span.textContent = text.value.toUpperCase();
+            delt_btn.textContent = "削除";
+            comp_btn.textContent = "完了";
+            delt_btn.classList.add("delete");
+            comp_btn.classList.add("complete");
+            li.appendChild(span);
+            li.appendChild(comp_btn);
+            li.appendChild(delt_btn);
+            list.appendChild(li);
+            text.value = "";
+            uppdateCount();
+
+        }
+        btn.addEventListener("click",addTask);
+        list.addEventListener("click",function(e){
+            if(e.target.tagName === "SPAN"){
+                if(e.target.textContent === e.target.textContent.toUpperCase()){
+                    e.target.textContent = e.target.textContent.toLowerCase();
+                }else{
+                    e.target.textContent = e.target.textContent.toUpperCase();
+                }
+            }
+            if(e.target.classList.contains("complete")){
+                const li = e.target.parentElement;
+                if(li.classList.toggle("done")){
+                    e.target.textContent = "未完了";
+                }else{
+                    e.target.textContent = "完了";
+                }
+                uppdateCount();
+            }
+            if(e.target.classList.contains("delete")){
+                e.target.parentElement.remove();
+                uppdateCount();
+            }
+        });
+        all_btn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                item.style.display = "";
+            });
+        });
+        dlt_Btn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                if(!item.classList.contains("done")){
+                    item.style.display = "";
+                }else{
+                    item.style.display = "none"
+                }
+            });
+        });
+        comp_Btn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                if(item.classList.contains("done")){
+                    item.style.display = ""
+                }else{
+                    item.style.display = "none"
+                }
+            });
+        });
+
+    </script>
+    <style>
+        li.done span{
+            text-decoration: line-through;
+        }
+    </style>
+</html>
