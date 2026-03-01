@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <button class="btn">追加</button>
+        <button class="allBtn">すべて</button>
+        <button class="compBtn">完了</button>
+        <button class="deltBtn">未完了</button>
+        <ul class="list"></ul>
+        <div class="counter"></div>
+    </body>
+</body>
+<script>
+    const text = document.querySelector(".text");
+    const btn = document.querySelector(".btn");
+    const allBtn = document.querySelector(".allBtn");
+    const compBtn = document.querySelector(".compBtn");
+    const deltBtn = document.querySelector(".deltBtn");
+    const list = document.querySelector(".list");
+    const counter = document.querySelector(".counter");
+    let todos = [];
+    text.addEventListener("keydown",function(e){
+        if(e.key ==="Enter"){
+            addTask();
+        }
+    });
+    function appdatecount(){
+        const items = document.querySelectorAll("li");
+        let num = 0;
+        items.forEach(function(item){
+            if(!item.classList.contains("done")){
+                num++
+            }
+        })
+        counter.textContent = "未完了タスク"+num;
+    }
+    
+    function renderTodos(){//画面にデータに保存したものを出力
+        list.innerHTML = "";
+        todos.forEach(function(todo,index){ 
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        const delt_btn = document.createElement("button");
+        const comp_btn = document.createElement("button");
+        li.dataset.index = index;//その要素の正しい番号をくれるからindex,ここでlengthを使うと最後の数が全要素に出てくる。
+        span.textContent = todo.text.toUpperCase();
+        if(todo.done){//todo.doneは配列の中身
+            li.classList.add("done");//リロードしても線が消えないようにもし todo.done が true だったら線をつける
+        }
+
+        delt_btn.textContent = "削除";
+        comp_btn.textContent = "完了";
+        delt_btn.classList.add("delete");
+        comp_btn.classList.add("complete");
+        li.appendChild(span);
+        li.appendChild(comp_btn);
+        li.appendChild(delt_btn);
+        list.appendChild(li);})
+       appdatecount();
+
+    }
+    function addTask(){
+        if(text.value.trim()==="")return;
+        todos.push({
+            text: text.value,
+            done: false
+        });
+        text.value = "";
+        savedTodos();
+        renderTodos();
+    }
+    btn.addEventListener("click",addTask);
+    function savedTodos(){
+        localStorage.setItem("todos",JSON.stringify(todos));//名前、文字列に直すjson.st
+    }
+    function appdateIndex(){
+        const items = document.querySelectorAll("li");
+        items.forEach(function(item,i){
+            item.dataset.index = i
+        });
+    }
+    list.addEventListener("click",function(e){
+        if(e.target.tagName === "SPAN"){
+            if(e.target.textContent === e.target.textContent.toUpperCase()){
+                e.target.textContent = e.target.textContent.toLowerCase(); 
+            }else{
+                e.target.textContent = e.target.textContent.toUpperCase();
+            }
+        }
+
+        if(e.target.classList.contains("complete")){
+            const li = e.target.parentElement;
+            const index = li.dataset.index;
+            const isDone = li.classList.toggle("done")
+            todos[index].done = isDone;
+            if(isDone){
+                e.target.textContent = "未完了"
+            }else{
+                e.target.textContent = "完了"
+            }
+            savedTodos();
+            appdatecount();
+        }
+        if(e.target.classList.contains("delete")){
+            const li = e.target.parentElement;
+            const index = li.dataset.index;
+            todos.splice(index,1);
+            li.remove();
+            appdateIndex();
+            savedTodos();
+            appdatecount();
+        }
+ 
+    });
+    allBtn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                item.style.display = ""
+            });
+        });
+        compBtn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                if(item.classList.contains("done")){
+                    item.style.display = ""
+                }else{
+                    item.style.display = "none";
+                }
+            });
+        });
+        deltBtn.addEventListener("click",function(){
+            const items = document.querySelectorAll("li");
+            items.forEach(function(item){
+                if(!item.classList.contains("done")){
+                    item.style.display = ""
+                }else{
+                    item.style.display = "none";
+                }
+            });
+        });
+    </script>
+    <style>
+        li.done span{
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+    </html>
