@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <button class="btn">追加</button>
+        <button class="allBtn">すべて</button>
+        <button class="compBtn">完了</button>
+        <button class="deltBtn">未完了</button>
+        <ul class="list"></ul>
+        <div class="counter"></div>
+    </body>
+    <script>
+        const text = document.querySelector(".text");
+        const btn = document.querySelector(".btn");
+        const allBtn = document.querySelector(".allBtn");
+        const compBtn = document.querySelector(".compBtn");
+        const deltBtn = document.querySelector(".deltBtn");
+        const list = document.querySelector(".list");
+        const counter = document.querySelector(".counter");
+        let todos = [];
+        let filter = "all";
+        function savedTodos(){
+            localStorage.setItem("todos",JSON.stringify(todos));
+        }
+        function loadTodos(){
+            const saved = localStorage.getItem("todos");
+            if(saved){
+                todos = JSON.parse(saved);
+            }
+        }
+        function addTask(){
+            if(text.value.trim() === "")return;
+            todos.push({
+                text: text.value,
+                done: false
+            });
+            text.value = "";
+            savedTodos();
+            renderTodos();
+        }
+        function renderTodos(){
+            list.innerHTML="";
+            todos.forEach(function(todo,index){
+                if(filter === "complete" && !todo.done/*未完了だった時false*/){//完了だけ表示したい
+                    return;//表示しない
+                }
+                if(filter === "incomplete" && todo.done/*完了だった時true*/){//未完了だけ表示したい
+                        return;
+                }
+                const li = document.createElement("li");
+                const span = document.createElement("span");
+                const comp_btn = document.createElement("button");
+                const delt_btn = document.createElement("button");
+                const change_btn = document.createElement("button");
+                li.dataset.index = index;
+                span.textContent = todo.text;
+                if(todo.done){
+                    comp_btn.textContent = "未完了";
+                }else{
+                    comp_btn.textContent = "完了";
+                }
+                delt_btn.textContent = "削除";
+                change_btn.textContent = "編集";
+                comp_btn.classList.add("complete");
+                delt_btn.classList.add("delete");
+                change_btn.classList.add("change");
+                if(todo.done){
+                    li.classList.add("done");
+                }
+                li.appendChild(span);
+                li.appendChild(comp_btn);
+                li.appendChild(delt_btn);
+                li.appendChild(change_btn);
+                list.appendChild(li);
+            });
+            uppdateCount();
+            
+        }
+        text.addEventListener("keydown",function(e){
+            if(e.key === "Enter"){
+                addTask();
+            }
+        });
+        function uppdateCount(){
+            let num = 0;
+            todos.forEach(function(todo){
+                if(!todo.done){
+                    num++
+                }
+             
+            });
+            counter.textContent = "未完了タスク"+num;
+        }
+        btn.addEventListener("click",addTask);
+        window.addEventListener("DOMContentLoaded",function(){
+            loadTodos();
+            renderTodos();
+        });
+        list.addEventListener("click",function(e){
+                console.log(e.target);
+            if(e.target.classList.contains("complete")){
+                const li = e.target.parentElement;
+                const index = li.dataset.index;
+                const isDone = li.classList.toggle("done");
+                todos[index].done = isDone;
+              
+                savedTodos();
+                renderTodos();
+            }
+            if(e.target.classList.contains("delete")){
+                const li = e.target.parentElement
+                const index = li.dataset.index
+                todos.splice(index,1);
+                savedTodos();
+                renderTodos();
+            }
+            if(e.target.classList.contains("change")){
+                const li = e.target.parentElement;
+                const index = li.dataset.index;
+                const newText = prompt("新しいテキストを入力してください");
+                if(newText !== null && newText.trim() !== ""){
+                    todos[index].text = newText;
+                }
+                savedTodos();
+               renderTodos();
+            }
+
+        });
+        allBtn.addEventListener("click",function(){
+           filter = "all";
+           renderTodos();
+        });
+        compBtn.addEventListener("click",function(){
+          filter = "complete";
+          renderTodos();
+        });
+        deltBtn.addEventListener("click",function(){
+         filter = "incomplete";
+         renderTodos();
+        });
+            
+
+        
+
+    </script>
+    <style>
+        li.done span{
+            text-decoration: line-through;
+            color: aqua;
+        }
+    </style>
+</html>
