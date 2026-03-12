@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <input type="date" class="deadline">
+        <select class="priority">
+            <option value="high">高</option>
+            <option value="middle">中</option>
+            <option value="low">低</option>
+        </select>
+        <button class="addBtn">追加</button>
+        <button class="allBtn">全て</button>
+        <button class="compBtn">完了</button>
+        <button class="incompBtn">未完了</button>
+        <button class="delt_Comp">完了タスク削除</button>
+        <input type="text" class="search" placeholder="検索">
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <ul class="list"></ul>
+        <div class="counter">
+            <p class="total"></p>
+            <p class="comp_count"></p>
+            <p class="incomp_count"></p>
+        </div>
+    </body>
+    <script>
+        const text = document.querySelector(".text");
+        const deadline = document.querySelector(".deadline");
+        const priority = document.querySelector(".priority");
+        const addBtn = document.querySelector(".addBtn");
+        const allBtn = document.querySelector(".allBtn");
+        const compBtn = document.querySelector(".compBtn");
+        const incompBtn = document.querySelector(".incompBtn");
+        const delt_Comp = document.querySelector(".delt_Comp");
+        const search = document.querySelector(".search");
+        const list = document.querySelector(".list");
+        const counter = document.querySelector(".counter");
+        const total = document.querySelector(".total");
+        const comp_count = document.querySelector(".comp_count");
+        const incomp_count = document.querySelector(".incomp_count");
+        let todos = [];
+        let filter = "all";
+        const priorityMap = {//辞書みたいな感じ
+                high:"高",
+                middle:"中",
+                low: "低"
+            }
+        function savedTodos(){
+            localStorage.setItem("todos",JSON.stringify(todos));
+        }
+        function loadTodos(){
+            const saved = localStorage.getItem("todos");
+            if(saved){
+                todos = JSON.parse(saved);
+            }
+        }
+        function addTask(){
+            if(text.value.trim()==="")return;
+            todos.push({
+                id: Date.now(),
+                text: text.value,
+                done: false,
+                deadline: deadline.value,
+                priority: priority.value
+            });
+            text.value = "";
+            deadline.value = "";
+            savedTodos();
+            renderTodos();
+        }
+        function createTodoElement(todo){
+            const li = document.createElement("li");
+            const span = document.createElement("span");
+            const comp_btn = document.createElement("button");
+            const delt_btn = document.createElement("button");
+            const change_btn = document.createElement("button");
+            let priorityText = priorityMap[todo.priority];//ここでpriorityMapと配列の中のtodo.priorityが同じものを持ってくる。
+            span.textContent = "("+priorityText+")"+todo.text +"("+todo.deadline+")";
+            li.dataset.id = todo.id;
+           comp_btn.textContent = todo.done? "未完了":"完了";
+            delt_btn.textContent = "削除";
+            change_btn.textContent = "編集";
+            if(todo.done){
+                li.classList.add("done");
+            }
+            comp_btn.classList.add("complete");
+            delt_btn.classList.add("delt");
+            change_btn.classList.add("change");
+            li.append(span,comp_btn,delt_btn,change_btn);
+            return li
+
+        }
+        function isVisibleTodo(todo,searchWord){//表示するべきか判定
+                if(!todo.text.includes(searchWord)){
+                    return false;//表示しない
+                 }
+                if(filter ==="complete" && !todo.done){//完了ボタンが押されたとき未完了は表示しない
+                    return false;//表示しない
+                }
+                if(filter ==="incomplete" && todo.done){//未完了ボタンが押されたとき完了は表示しない
+                    return false;//表示しない
+                }
+                return true;//ここにくるということは検索OK、フィルターOKなので表示
+            }
+        function renderTodos(){
+            list.innerHTML = "";
+            const searchWord = search.value;
+            const today = new Date().toISOString().split("T")[0];
+            todos.forEach(function(todo){
+                const li = createTodoElement(todo);
+                if(!isVisibleTodo(todo, searchWord)){//もし「このtodoを表示してはいけない」ならやめる。
+                        return;
+                }
+                if(todo.deadline && todo.deadline < today){
+                    li.style.color = "red";
+                }
+                list.appendChild(li);
+            });
+
+            updateCount();
+        }
+        function updateCount(){
+            const total_count = todos.length;
+            let comp_Num = 0;
+            let incomp_Num = 0;
+            todos.forEach(function(todo){
+                if(todo.done){
+                    comp_Num++
+                }else{
+                    incomp_Num++
+                }
+            });
+            total.textContent = "全て"+total_count;
+            comp_count.textContent = "完了"+comp_Num;
+            incomp_count.textContent = "未完了"+incomp_Num; 
+        }
+        function toggleTodo(id){
+            const todo = todos.find(function(todo){
+                    return todo.id === id;
+                });
+                todo.done = !todo.done
+                savedTodos();
+                renderTodos();
+            }
+        function deltTodo(id){
+            todos = todos.filter(function(todo){
+                    return todo.id !== id
+                });
+                savedTodos();
+                renderTodos();
+            }
+
+        function editTodo(id){
+            const newText = prompt("新しいテキストを入力してください");
+                if(newText !== null && newText.trim() !== ""){
+                    const todo = todos.find(function(todo){
+                    return todo.id === id
+                });
+                todo.text = newText;
+                }
+            savedTodos();
+            renderTodos();
+            }
+        //addevent
+        text.addEventListener("keydown",function(e){
+            if(e.key === "Enter"){
+                addTask();
+            }
+        });
+        search.addEventListener("input",function(){
+            renderTodos();
+        });
+        window.addEventListener("DOMContentLoaded",function(){
+            loadTodos();
+            renderTodos();
+            new Sortable(list,{
+                animation: 200,
+                onEnd:function(e){
+                    const movedItem = todos.splice(e.oldIndex,1)[0];
+                    todos.splice(e.newIndex,0,movedItem);
+                    savedTodos();
+                    renderTodos();
+                }
+
+            });
+        });
+        addBtn.addEventListener("click",addTask);
+        list.addEventListener("click",function(e){
+            const id = Number(e.target.parentElement.dataset.id);
+            if(e.target.classList.contains("complete")){
+                toggleTodo(id);
+            }
+            if(e.target.classList.contains("delt")){
+                deltTodo(id);
+            }
+            if(e.target.classList.contains("change")){
+                editTodo(id);
+            }
+        });
+        
+    
+        allBtn.addEventListener("click",function(){
+            filter = "all";
+            renderTodos();
+        });
+        compBtn.addEventListener("click",function(){
+            filter = "complete";
+            renderTodos();
+        });
+        incompBtn.addEventListener("click",function(){
+            filter = "incomplete";
+            renderTodos();
+        });
+        delt_Comp.addEventListener("click",function(){
+            todos = todos.filter(function(todo){
+                return !todo.done
+            });
+            savedTodos();
+            renderTodos();
+        });
+
+    </script>
+    <style>
+        li.done span{
+            text-decoration: line-through;
+            color: aquamarine;
+        }
+    </style>
+</html>
