@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Portfolio</title>
+    </head>
+    <body>
+        <input type="text" class="text">
+        <input type="date" class="deadline">
+        <select class="priority">
+            <option value="high">高</option>
+            <option value="middle">中</option>
+            <option value="low">低</option>
+        </select>
+        <button class="addBtn">追加</button>
+        <button class="allBtn">全て</button>
+        <button class="compBtn">完了</button>
+        <button class="incompBtn">未完了</button>
+        <button class="compDelet">完了タスク削除</button>
+        <input type="text" class="search" placeholder="検索">
+        <ul class="list"></ul>
+        <div class="counter">
+            <p class="total"></p>
+            <p class="compCount"></p>
+            <p class="incompCount"></p>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    </body>
+    <script>
+        const DOM = {
+            text: document.querySelector(".text"),
+            deadline: document.querySelector(".deadline"),
+            priority: document.querySelector(".priority"),
+            addBtn: document.querySelector(".addBtn"),
+            allBtn: document.querySelector(".allBtn"),
+            compBtn: document.querySelector(".compBtn"),
+            incompBtn: document.querySelector(".incompBtn"),
+            compDelt: document.querySelector(".compDelet"),
+            list: document.querySelector(".list"),
+            search: document.querySelector(".search"),
+            counter:document.querySelector(".counter"),
+            total: document.querySelector(".total"),
+            compCount: document.querySelector(".compCount"),
+            incompCount: document.querySelector(".incompCount")
+        }
+        let todos = [];
+        let filter = "all";
+        const priorityMap ={
+            high:"高",
+            middle:"中",
+            low:"低"
+        }
+        function savedTodos(){
+            localStorage.setItem("todos",JSON.stringify(todos));
+        }
+        function loadTodos(){
+            const saved = localStorage.getItem("todos");
+            if(saved) todos = JSON.parse(saved);
+        }
+        function addTask(){
+            if(DOM.text.value.trim() === "")return;
+            todos.push({
+                id: Date.now(),
+                text: DOM.text.value,
+                done: false,
+                deadline: DOM.deadline.value,
+                priority: DOM.priority.value
+            });
+            DOM.text.value = "";
+            DOM.deadline.value = "";
+            DOM.priority.value = "";
+            savedTodos();
+            renderTodos();
+        }
+        function createTodoElement(todo){
+            const li = document.createElement("li");
+            const span = document.createElement("span");
+            const comp_btn = document.createElement("button");
+            const delte_btn = document.createElement("button");
+            const change_btn = document.createElement("button");
+            span.textContent = `(${priorityMap[todo.priority]}${todo.text}${todo.deadline})`;
+            li.dataset.id = todo.id;
+            comp_btn.textContent = todo.done?"未完了":"完了";
+            delte_btn.textContent = "削除";
+            change_btn.textContent = "編集";
+            comp_btn.classList.add("complete");
+            delte_btn.classList.add("delt");
+            change_btn.classList.add("change");
+            if(todo.done) li.classList.add("done");
+            li.append(span,comp_btn,delte_btn,change_btn);
+            return li;
+        }
+        function isVisibleTodo(todo,searchWord){
+            if(filter === "complete" && !todo.done) return false;
+            if(filter === "incomplete" && todo.done) return false;
+            if(!todo.text.toLowerCase().includes(searchWord)) return false;
+            return true;
+        }
+        function renderTodos(){
+            DOM.list.innerHTML = "";
+            const searchWord = DOM.search.value.toLowerCase();
+            const today = new Date().toISOString().split("T")[0];
+            todos.forEach(function(todo){
+                if(!isVisibleTodo(todo,searchWord))return;
+                const li = createTodoElement(todo);
+                if(todo.deadline && todo.deadline < today) li.style.color = "red";
+                if(todo.priority === "high") li.style.color = "red";
+                if(todo.priority === "middle") li.style.color = "orange";
+                if(todo.priority === "low") li.style.color = "blue";
+                DOM.list.appendChild(li);
+            });
+            updateCount();
+        }
+        function updateCount(){
+            const total_Num = todos.length;
+            let comp_Num = 0;
+            todos.forEach(function(todo){
+                if(todo.done) comp_Num++;
+            });
+            const incomp_Num = total_Num - comp_Num;
+            DOM.total.textContent = "全て" + total_Num;
+            DOM.compCount.textContent = "完了" + comp_Num;
+            DOM.incompCount.textContent = "未完了" + incomp_Num;
+            savedTodos();
+        }
+        function toggleTodo(id){
+            const todo = todos.find(function(todo){
+                return todo.id === id
+            });
+            todo.done = !todo.done
+            savedTodos();
+            renderTodos();
+        }
+        function deltTodo(id){
+            todos = todos.filter(function(todo){
+                return todo.id !== id
+            });
+            savedTodos();
+            renderTodos();
+        }
+        function editTodo(id){
+            const newText = prompt("新しいテキストを入力してください");
+            if(newText !== null && newText.trim() !== ""){
+                const todo = todos.find(function(todo){
+                    return todo.id === id
+                });
+                todo.text = newText;
+                savedTodos();
+                renderTodos();
+            }
+        }
+        DOM.addBtn.addEventListener("click",addTask);
+        DOM.text.addEventListener("keydown",function(e){
+            if(e.key === "Enter") addTask();
+        });
+        DOM.search.addEventListener("input",function(){
+            renderTodos();
+        });
+        window.addEventListener("DOMContentLoaded",function(){
+            loadTodos();
+            renderTodos();
+            new Sortable(DOM.list,{
+                animation:150,
+                onEnd: function(e){
+                    const movedItem = todos.splice(e.oldIndex,1)[0];
+                    todos.splice(e.newIndex,0,movedItem);
+                    savedTodos();
+                    renderTodos();
+                }
+            });
+        });
+        DOM.list.addEventListener("click",function(e){
+            const li = e.target.closest("li");
+            if(!li) return;
+            const id = Number(li.dataset.id);
+            if(e.target.classList.contains("complete")) toggleTodo(id);
+            if(e.target.classList.contains("delt")) deltTodo(id);
+            if(e.target.classList.contains("change")) editTodo(id);
+        });
+        DOM.allBtn.addEventListener("click",function(){
+            filter = "all";
+            renderTodos();
+        });
+        DOM.compBtn.addEventListener("click",function(){
+            filter = "complete"
+            renderTodos();
+        });
+        DOM.incompBtn.addEventListener("click",function(){
+            filter = "incomplete";
+            renderTodos();
+        });
+        DOM.compDelet.addEventListener("click",function(){
+            todos = todos.filter(function(todo){
+                return !todo.done
+            });
+            savedTodos();
+            renderTodos();
+        });
+    </script>
+    <style>
+              li.done span{
+        text-decoration: line-through;
+        color: gray;
+        }
+        body{
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        }
+
+        li{
+        display:flex;
+        gap:10px;
+        margin:5px 0;
+        }
+
+        button{
+        cursor:pointer;
+        }
+    </style>
+</html>

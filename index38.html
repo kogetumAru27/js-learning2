@@ -189,7 +189,8 @@
         });
         addBtn.addEventListener("click",addTask);
         list.addEventListener("click",function(e){
-            const id = Number(e.target.parentElement.dataset.id);
+            const li = e.target.closest("li");
+            const id = Number(li.dataset.id);//一番近いliを探す
             if(e.target.classList.contains("complete")){
                 toggleTodo(id);
             }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Star app</title>
+    </head>
+    <body>
+        <canvas class="sky" width="800" height="500"></canvas>
+    </body>
+    <script>
+        const canvas = document.querySelector(".sky");
+        const ctx = canvas.getContext("2d");//ペンみたいなもの（描画機能）
+        canvas.style.background = "black";
+        for(let i = 0; i < 50; i++){
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            ctx.beginPath();//新しい図形を描く準備(今回は星が円なので図形)
+            ctx.arc(x,y,2,0,Math.PI * 2);//円を描く命令,arc(x座標, y座標, 半径, 開始角度0, 終了角度360)
+            ctx.fillStyle = "white";//塗る色
+            ctx.fill();//塗るこれがないと表示されない
+        }
+    </script>
+</html>
