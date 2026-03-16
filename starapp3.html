@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Star app</title>
+    </head>
+ <body>
+    <canvas id="sky" width="800" height="500"></canvas>
+    <div id="score"></div>
+ </body>
+ <script>
+    const DOM = {
+        canvas: document.getElementById("sky"),
+        score: document.getElementById("score"),
+    }
+    const pen = DOM.canvas.getContext("2d");
+    let score_count = 0;
+    let countId = 0;
+    let stars = [];
+    DOM.canvas.style.background = "black"
+    function createStars(){
+        for(let i = 0; i < 50; i++){
+            const x = Math.random() * DOM.canvas.width;
+            const y = Math.random() * DOM.canvas.height;
+            const vy = Math.random() * 2 + 0.5; 
+            stars.push({
+                id: countId++,
+                x: x,
+                y: y,
+                vy: vy
+            });
+        }
+    }
+    function drawStars(){
+        stars.forEach(function(star){
+            pen.beginPath();
+            pen.arc(star.x,star.y,2,0,Math.PI * 2);
+            pen.fillStyle = "white";
+            pen.fill();
+        });
+    }
+    function loop(){
+        stars.forEach(function(star){
+            star.y += star.vy 
+        });
+        pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+        drawStars();
+        requestAnimationFrame(loop);
+    }
+    createStars();
+    drawStars();
+    loop();
+    DOM.canvas.addEventListener("click",function(e){
+        let clickedId = null;
+        const clickX = e.offsetX;
+        const clickY = e.offsetY;
+        stars.forEach(function(star){
+            if(clickX > star.x - 5 && star.x + 5 > clickX && clickY > star.y - 5 &&  star.y + 5 > clickY){
+                 clickedId = star.id;
+            }
+        });
+        if(clickedId !== null){
+                stars = stars.filter(function(star){
+                    return    star.id !== clickedId
+                });
+                score_count++;
+            }
+         stars.push({
+            id: countId++,
+            x: Math.random() * DOM.canvas.width,
+            y: Math.random() * DOM.canvas.height,
+        })
+        pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+        drawStars();
+        DOM.score.textContent = "Score: " + score_count;
+        
+
+        });
+ </script>
+ </html>

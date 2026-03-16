@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Star app</title>
+    </head>
+    <body>
+        <canvas id="sky" width="800" height="500"></canvas>
+        <div id="score">score: 0</div>
+    </body>
+    <script>
+       const DOM ={ 
+            canvas : document.getElementById("sky"),
+            counter : document.getElementById("score")
+        }
+        const pen = DOM.canvas.getContext("2d");
+        let stars = [];
+        let score = 0;
+        let nextId = 0;
+        DOM.canvas.style.background = "black";
+    function createStars(){
+        for(let i = 0; i < 50; i++){
+        const x = Math.random() * DOM.canvas.width;//xの位置を決めている。
+        const y = Math.random() * DOM.canvas.height;//yの位置を決めている。
+        stars.push({
+            id: nextId++,//時間だと50個全て同じidになってしまうためiを入れる。
+            x: x,
+            y: y
+        });
+        }
+    }
+    function drawStars(){
+        stars.forEach(function(star){//全て書く
+            pen.beginPath();
+            pen.arc(star.x,star.y,2,0,Math.PI * 2);
+            pen.fillStyle = "white";
+            pen.fill();
+        });
+    }
+
+    createStars();
+    drawStars();
+          
+    
+    DOM.canvas.addEventListener("click",function(e){
+        let clickedId = null;//保存用の変数、htmlと違い要素がないから変数を用意する必要がある。nullを入れるのはクリックされた星がないから(空）だから
+        const clickX = e.offsetX;//基準からの距離を代入X
+        const clickY = e.offsetY;//基準からの距離を代入Y
+        stars.forEach(function(star){
+            if(clickX > star.x -5 && clickX < star.x + 5 && clickY < star.y + 5 && clickY > star.y - 5)/*当たり判定を広げている。ピッタリ押すのは難しいので*/{
+                clickedId = star.id;//クリックされたidを入れる
+            } 
+        });
+        if(clickedId !== null){//idが入っていたら
+            stars = stars.filter(function(star){
+            return star.id !== clickedId;//(押されたid)違うidは残す
+        });
+         score++
+        }
+        DOM.counter.textContent = "Score: " + score;
+        pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);//画面を掃除
+        drawStars();//再描画
+    });
+
+ </script>
+</html>
