@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Star app</title>
+    </head>
+    <body>
+        <canvas id="sky" width="800" height="500"></canvas>
+        <div id="score">score: 0</div>
+        <div id="time">time: 45</div>
+    </body>
+    <script>
+        const DOM = {
+            canvas: document.getElementById("sky"),
+            score: document.getElementById("score"),
+            time: document.getElementById("time")
+        }
+        let stars = [];
+        let countId = 0;
+        let score_count = 0;
+        let time_countdown = 45;
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.style.background = "black";
+        function createStars(){
+            for(let i = 0; i < 50; i++){
+            const x = Math.random() * DOM.canvas.width;
+            const y = Math.random() * DOM.canvas.height;
+            let vx,vy,type;
+            if(i % 3 === 0){
+                vx = Math.random() * 1 - 0.5;
+                vy = Math.random() * 1 - 0.5;
+                type = "slow";
+            }else if(i % 3 === 1){
+                vx = Math.random() * 3 - 1;
+                vy = Math.random() * 3 - 1;
+                type = "normal";
+            }else {
+                vx = Math.random() * 6 - 3;
+                vy = Math.random() * 6 - 3;
+                type = "fast";
+            }
+            stars.push({
+                id: countId++,
+                x:x,
+                y:y,
+                vx:vx,
+                vy:vy,
+                type:type
+            });
+            }
+
+            
+        }
+        function drawStars(){
+            stars.forEach(star => {
+                pen.beginPath();
+                pen.arc(star.x,star.y,3,0,Math.PI * 2);
+                pen.fillStyle = "white";
+                pen.fill();
+            });
+        }
+        function loop(){
+            stars.forEach(star => {//全部動かすからforEach
+                star.x += star.vx;
+                star.y += star.vy;
+                if(0 > star.x)star.x = DOM.canvas.width;
+                if(star.x >DOM.canvas.width) star.x = 0;
+                if(0 > star.y)star.y = DOM.canvas.height;
+                if(star.y >DOM.canvas.height) star.y = 0;
+            });
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+            drawStars();
+            requestAnimationFrame(loop);
+        }
+        function clicked(star,clickX,clickY){
+            return(star.x + 10 > clickX && clickX > star.x - 10 && star.y + 10 > clickY && clickY > star.y - 10 );
+        }
+        function timer(){
+            const timer = setInterval(()=>{
+                time_countdown --;
+                DOM.time.textContent = "time: " +time_countdown;
+                if(time_countdown <= 0){
+                    clearInterval(timer);// ←止める
+                    alert("ゲーム終了! スコア: " + score_count);
+                }
+            },1000);
+        }
+        createStars();
+        drawStars();
+        loop();
+        timer();
+        DOM.canvas.addEventListener("click",function(e){
+            const clickX = e.offsetX;
+            const clickY = e.offsetY;
+            let hit = false;
+            stars = stars.filter(star => {
+                if(clicked(star,clickX,clickY)){
+                    hit = true;
+                    if(star.type === "fast") score_count += 10;
+                    else if(star.type === "normal") score_count += 3;
+                    else if(star.type === "slow") score_count += 1;
+                    return false;
+                }
+                return true;
+            });
+            if(!hit) score_count -= 1;
+            stars.push({
+                id: countId++,
+                x: Math.random() * DOM.canvas.width,
+                y: Math.random() * DOM.canvas.height,
+                vx: Math.random() * 2 - 0.5,
+                vy: Math.random() * 2 - 0.5,
+                type:["fast","normal","slow"][Math.floor(Math.random()*3)]
+            })
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+            drawStars();
+            DOM.score.textContent = "score: " + score_count;
+
+        });
+
+    </script>
+</html>

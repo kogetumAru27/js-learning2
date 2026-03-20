@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Star app</title>
+    </head>
+    <body>
+        <canvas id="sky" width="800" height="500"></canvas>
+        <div id="score">score: 0</div>
+        <div id="time">time: 45</div>
+    </body>
+    <script>
+        const DOM = {
+            canvas: document.getElementById("sky"),
+            score: document.getElementById("score"),
+            time: document.getElementById("time")
+        }
+        let isGameover = false;
+        let countId = 0;
+        let score_count = 0;
+        let time_countdown = 45;
+        let stars = [];
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.style.background = "black";
+        function createStars(){
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * DOM.canvas.width;
+                const y = Math.random() * DOM.canvas.height;
+                let vx,vy,type;
+                let radius = Math.random() * 3 + 2;
+                if(i % 3 === 0){
+                    vx = Math.random() * 1 - 0.5;
+                    vy = Math.random() * 1 - 0.5;
+                    type = "slow";
+                }else if(i % 3 === 1){
+                    vx = Math.random() * 3 - 1;
+                    vy = Math.random() * 3 - 1;
+                    type = "normal"; 
+                }else{
+                    vx = Math.random() * 6 - 3;
+                    vy = Math.random() * 6 - 3;
+                    type = "fast"; 
+                }
+               stars.push({
+                id: countId++,
+                x: x,
+                y: y,
+                vx: vx,
+                vy: vy,
+                type: type,
+                radius: radius
+               });
+
+            }
+        }
+        function drawStars(){
+            stars.forEach(star => {
+                pen.beginPath();
+                pen.arc(star.x,star.y,star.radius,0,Math.PI * 2);
+                pen.fillStyle = "white";
+                pen.fill();
+            });
+        }
+        function loop(){
+            stars.forEach(star => {
+                star.x += star.vx;
+                star.y += star.vy;
+                if(star.x > DOM.canvas.width) star.x = 0;
+                if(0 > star.x) star.x = DOM.canvas.width;
+                if(star.y > DOM.canvas.height) star.y = 0;
+                if(0 > star.y) star.y = DOM.canvas.height;
+            });
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+            drawStars();
+            requestAnimationFrame(loop)
+        }
+        function timer(){
+            const timer = setInterval(() =>{
+                time_countdown--;
+                DOM.time.textContent = "time: " + time_countdown;
+                if(time_countdown <= 0){
+                    isGameover = true;
+                    clearInterval(timer);
+                    alert("終了！スコア: " + score_count);
+                }
+            },1000);
+        }
+        function clicked(star,clickX,clickY){
+            let extra = 10;
+            const dx = star.x - clickX;
+            const dy = star.y - clickY;
+            return Math.sqrt((dx*dx)+(dy*dy)) <= star.radius + extra;
+        }
+        function createnewStars(){
+            return({
+                id: countId++,
+                x: Math.random() * DOM.canvas.width,
+                y: Math.random() * DOM.canvas.height,
+                vx: Math.random() * 2 - 0.5,
+                vy: Math.random() * 2 - 0.5,
+                type: ["fast","normal","slow"][Math.floor(Math.random() * 3)],
+                radius: Math.random() * 3 + 2
+            });
+        }
+        createStars();
+        drawStars();
+        loop();
+        timer();
+        //イベント
+        DOM.canvas.addEventListener("click",function(e){
+            if(isGameover)return;
+            let hit = false;
+            const clickX = e.offsetX;
+            const clickY = e.offsetY;
+            stars = stars.filter(star => {
+                if(clicked(star,clickX,clickY)){
+                    hit =  true;
+                    if(star.type === "fast")score_count += 10;
+                    if (star.type === "normal")score_count += 5;
+                    if(star.type === "slow")score_count+= 1; 
+                    return false;  
+                }
+                    return true;
+            });
+            if(!hit)score_count -= 2;
+            stars.push(createnewStars());
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+            drawStars();
+            DOM.score.textContent = "score: " + score_count;
+        });
+    </script>
+</html>
