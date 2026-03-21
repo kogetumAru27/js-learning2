@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <ul id="list"></ul>
+        <canvas id="sky"></canvas>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc"),
+            list: document.getElementById("list"),
+            canvas: document.getElementById("sky"),
+        }
+        const stars = [{
+            name:"星",
+            season: "冬",
+            description: "はな",
+            stars: [{x: 100, y:100},{x:200 ,y:200},{x:300,y:300}]
+        },{
+            name:"宇宙",
+            season: "春",
+            description: "はな",
+
+        },
+        {
+            name:"宇宙",
+            season: "通年",
+            description: "はな",
+
+        }];
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const results = getTodaystars(month); 
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.width = window.innerWidth - 10;
+        DOM.canvas.height = window.innerHeight - 10;
+        DOM.canvas.style.background = "black";
+        function getSeason(month){
+            if(month === 12 || month === 1 || month === 2)return"冬";
+            if(month >= 3 && month <= 5)return"春";
+            if(month >= 6 && month <= 8)return"夏";
+            if(month >= 9 && month <= 11)return"秋";
+        }
+        function seasonscolor(star){
+            if(star.season === "冬")return "blue";
+            if(star.season === "春")return "green";
+            if(star.season === "夏")return "red";
+            if(star.season === "秋")return "orange";
+            if(star.season === "通年")return "gray";  
+        }
+        function getTodaystars(month){
+            const season = getSeason(month);
+            return stars.filter(star => {
+                return star.season === season ||star.season === "通年";
+            });
+        }
+        function showAll(){
+            results.forEach(star => {
+                const li = document.createElement("li");
+                const spanName = document.createElement("span");
+                const spanDesc = document.createElement("span");
+                const btn = document.createElement("button");
+                btn.classList.add("btn");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴表示";
+                btn.addEventListener("click",function(){
+                    spanDesc.textContent = spanDesc.textContent? "": star.description;
+                });
+                li.append(spanName,spanDesc,btn);
+                DOM.list.appendChild(li);
+                
+                
+            });
+        }
+        function drawStars(){
+            stars.forEach(star => {
+                if(!star.stars)return;
+                star.stars.forEach(point => {
+                    pen.beginPath();
+                    pen.arc(point.x,point.y,3,0,Math.PI * 2);
+                    pen.fillStyle = seasonscolor(star);
+                    pen.fill();
+                });
+            });
+        }
+        showAll();
+        drawStars();
+    </script>
+</html>

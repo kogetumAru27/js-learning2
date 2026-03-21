@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <ul id="list"></ul>
+        <canvas id="sky"></canvas>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc"),
+            list: document.getElementById("list"),
+            canvas: document.getElementById("sky"),
+        }
+        const stars = [ {name: "オリオン座",season: "冬",description: "冬の代表的な星座で、三ツ星が一直線に並ぶのが特徴。",  stars: [{ x: 100, y: 100 },{ x: 150, y: 120 },{ x: 200, y: 140 }]},
+                        {name: "北極星(polaris)",season:"通年",description: "ほぼ動かないように見える星で、方角を知る目印になる。"},
+                        {name: "はくちょう座",season: "夏",description: "デネブを含む星座で、天の川に沿って広がる。"},
+                        {name: "カシオペヤ座", season: "秋", description: "W字型の形が特徴的な星座。" },
+                        {name: "ペガスス座", season: "秋", description: "四角形の大きな星の形が目立つ。" },
+                        { name: "しし座", season: "春", description: "獅子の形をした星座で、しし座のしっぽに明るい星がある。" },
+                        { name: "ふたご座", season: "冬", description: "双子の姿を象った星座で、明るいカストルとポルックスがある。" },
+                        { name: "こと座", season: "夏", description: "ベガを中心とした小さくて美しい星座。" },
+                        { name: "わし座", season: "夏", description: "アルタイルを中心とした天の川沿いの星座。" },
+                        { name: "おおぐま座", season: "春", description: "北斗七星を含む大きな星座。" },
+                        { name: "こぐま座", season: "通年", description: "小さいが北極星を含む星座。" },
+                        { name: "みずがめ座", season: "秋", description: "星座の形は水を注ぐ姿を表す。" },
+                        { name: "さそり座", season: "夏", description: "鋭い尾が特徴的で、赤いアンタレスが目立つ。" },
+                        { name: "やぎ座", season: "秋", description: "地味だが冬に向けて見える小さい星座。" },
+                        { name: "おうし座", season: "冬", description: "プレアデス星団（すばる）が含まれる美しい星座。" },
+                        { name: "月", season: "通年", description: "満月・新月などの周期で見える。"},
+                        //レア
+                        { name: "ペルセウス座流星群", season: "夏", description: "毎年8月に見られる流星群。", type: "rare" },
+                        { name: "ヘール・ボップ彗星", season: "不定期", description: "数十年に一度観測できる彗星。", type: "rare" }
+                    ];
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.width = window.innerWidth - 20;
+        DOM.canvas.height = window.innerHeight - 20;
+        DOM.canvas.style.background = "black";
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const results = getTodaystars(month);
+        results.forEach(star => {
+            console.log(star.name,star.description);
+        });
+        console.log("season: " , getSeason(month));
+        console.log("results: ",results);
+        function getSeason(month){//月から季節に変換
+            if(month === 12 || month === 1 || month ===2)return"冬";
+            if(month >= 3 && month <= 5)return"春";
+            if(month >= 6 && month <= 8)return"夏";
+            if(month >= 9 && month <= 11)return"秋";
+        }
+        function getTodaystars(month){//季節のプロパティから今の季節に見られる星を残す.
+            const season = getSeason(month);
+            return stars.filter(star => {
+                return star.season === season || star.season === "通年" ||star.type === "rare";
+            }) 
+        }
+        function Elements(){
+            results.forEach(star => {
+                const li = document.createElement("li");
+                const spanName = document.createElement("span");
+                const spanDesc = document.createElement("span");
+                const btn = document.createElement("button");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴を表示";
+                btn.classList.add("btn");
+                btn.addEventListener("click",function(){
+                   spanDesc.textContent = spanDesc.textContent? "":star.description;//toggleオンオフできる
+                });
+                li.append(spanName,btn,spanDesc);
+                DOM.list.appendChild(li);
+
+            });
+        }
+        Elements();
+        function drawStars(){
+            stars.forEach(star => {
+                if(!star.stars) return; // 座標ないやつはスキップ
+                star.stars.forEach(point => {
+                    pen.beginPath();
+                    pen.arc(point.x,point.y,3,0,Math.PI * 2);
+                    pen.fillStyle ="white";
+                    pen.fill();
+                });
+            });
+        }
+        drawStars();
+
+        
+    </script>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc")
+        }
+        const stars = [{
+            name: "オリオン座",
+            season:"冬",
+            description: "冬の代表的な星座で、三ツ星が一直線に並ぶのが特徴。"
+        },
+        {
+            name: "北極星(polaris)",
+            season:"通年",
+            description: "ほぼ動かないように見える星で、方角を知る目印になる。"
+
+        },
+        {
+            name: "はくちょう座",
+            season: "夏",
+            description: "デネブを含む星座で、天の川に沿って広がる。"
+        }];
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const results = getTodaystars(month);
+        results.forEach(result => {
+            console.log(result);
+        });//デバッグ用
+        function getSeason(month){
+            if(month === 12 || month === 1 || month === 2)return"冬";
+            if(month >= 3 && month <=5)return"春"
+            if(month >= 6 && month <=8)return"夏"
+            if(month >= 9 && month <=11)return"秋"
+        }
+        function getTodaystars(month){
+        const season = getSeason(month);
+        return stars.filter(star => {
+        return star.season === season  || star.season === "通年"
+        });
+    }
+    DOM.name.textContent = results[0].name;
+    DOM.desc.textContent = results[0].description;
+    </script>
+</html>
