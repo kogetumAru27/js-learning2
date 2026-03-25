@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <ul id="list"></ul>
+        <canvas id="sky"></canvas>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc"),
+            list: document.getElementById("list"),
+            canvas: document.getElementById("sky"),
+        }
+        const stars = [
+                        {name: "オリオン座",season: "春",description: "冬の代表的な星座で、三ツ星が一直線に並ぶのが特徴。",  stars: [{x:400, y:100},
+                        {x:500, y:100}, {x:430, y:220},{x:460, y:200}, {x:490, y:180},{x:420, y:300},{x:520, y:300}], lines:[[0,2],[2,3],[3,4],[4,1],[2,5],[4,6],[0,1]]},
+                        {name: "北極星(polaris)",season:"通年",description: "ほぼ動かないように見える星で、方角を知る目印になる。数千年で変わるとか。"},
+                        {name: "はくちょう座",season: "夏",description: "デネブを含む星座で、天の川に沿って広がる。"},
+                        {name: "カシオペヤ座", season: "秋", description: "W字型の形が特徴的な星座。" },
+                        {name: "ペガスス座", season: "秋", description: "四角形の大きな星の形が目立つ。" },
+                        { name: "しし座", season: "春", description: "獅子の形をした星座で、しし座のしっぽに明るい星がある。" },
+                        { name: "ふたご座", season: "冬", description: "双子の姿を象った星座で、明るいカストルとポルックスがある。" },
+                        { name: "こと座", season: "夏", description: "ベガを中心とした小さくて美しい星座。" },
+                        { name: "わし座", season: "夏", description: "アルタイルを中心とした天の川沿いの星座。" },
+                        { name: "おおぐま座", season: "春", description: "北斗七星を含む大きな星座。" },
+                        { name: "こぐま座", season: "通年", description: "小さいが北極星を含む星座。" },
+                        { name: "みずがめ座", season: "秋", description: "星座の形は水を注ぐ姿を表す。" },
+                        { name: "さそり座", season: "夏", description: "鋭い尾が特徴的で、赤いアンタレスが目立つ。" },
+                        { name: "やぎ座", season: "秋", description: "地味だが冬に向けて見える小さい星座。" },
+                        { name: "おうし座", season: "冬", description: "プレアデス星団（すばる）が含まれる美しい星座。" },
+                        { name: "月", season: "通年", description: "満月・新月などの周期で見える。"},
+                        ];
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const results = getTodaystars(month);
+        let currentStar = null;
+        //本当にできているか(filter)を比較用のデバッグ
+        stars.forEach(star => {
+            console.log(star);
+        });
+        console.log("結果:",results);
+        //canvas横と縦の長さ
+        DOM.canvas.width = window.innerWidth - 20;
+        DOM.canvas.height = window.innerHeight - 20;
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.style.background = "black";
+        //関数
+        //月から季節へ変換
+        function getSeason(month){
+            if(month === 12 || month === 1 || month ===2)return"冬"
+            if(3 <= month && month <= 5)return"春";
+            if(6 <= month && month <= 8)return"夏";
+            if(9 <= month && month <= 11)return"秋";
+        }
+        //現在の季節を確認
+        console.log("season: " ,getSeason(month));
+        //季節から今見れる星を取得
+        function getTodaystars(month){
+            const season = getSeason(month);
+            return stars.filter(star => {
+                return star.season === season || star.season === "通年";
+            });
+        }
+        //クリックされたら星座標あるもの描画,現在のオブジェクト全て表示
+        function showAll(){
+            results.forEach(star => {
+                console.log(star);
+                console.log(star.stars);
+                const li = document.createElement("li");
+                const spanName = document.createElement("span");
+                const spanDesc = document.createElement("span");
+                const btn = document.createElement("button");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴の表示";
+                btn.classList.add("btn");
+                btn.addEventListener("click",function(){
+                  if(currentStar === star){
+                    pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                    currentStar = null;
+                    spanDesc.textContent = "";
+                    return;
+                  }else{
+                    pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                    drawStars(star);
+                    currentStar = star;
+                    spanDesc.textContent = star.description;
+                  }
+                });
+                li.append(spanName,spanDesc,btn);
+                DOM.list.appendChild(li);
+
+            });
+        }
+        //星の描画
+        function drawStars(star){
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+            if(!star.stars)return;
+            star.stars.forEach(point => {
+                console.log(point);
+                pen.beginPath();
+                pen.arc(point.x,point.y,3,0,Math.PI * 2);
+                pen.fillStyle = "white";
+                pen.fill();
+            });
+            if(!star.lines)return;
+            star.lines.forEach(line => {
+                const p1 = star.stars[line[0]];
+                const p2 = star.stars[line[1]];
+                pen.beginPath();
+                pen.moveTo(p1.x,p1.y);
+                pen.lineTo(p2.x,p2.y);
+                pen.strokeStyle = "yellow"
+                pen.stroke();
+            });
+        }
+        showAll();
+    </script>
+</html>    

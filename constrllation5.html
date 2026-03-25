@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <ul id="list"></ul>
+        <canvas id="sky"></canvas>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc"),
+            list: document.getElementById("list"),
+            canvas: document.getElementById("sky")
+        }
+        const stars = [{
+            name:"星",
+            season: "通年",
+            description: "はな",
+            stars: [{x: 100, y:100},{x:200 ,y:200},{x:300,y:300}]
+        },{
+            name:"宇宙",
+            season: "春",
+            description: "はな",
+
+        },
+        {
+            name:"宇宙",
+            season: "通年",
+            description: "はな",
+
+        }];
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const results = getTodaystars(month);
+        stars.forEach(star => {
+            console.log(star);
+        });//全表示デバッグ用
+        results.forEach(result => {
+            console.log(result);
+        });//減っているか確認
+        console.log("season: ", getSeason(month))//現在の季節を確認
+        DOM.canvas.width = window.innerWidth - 20;
+        DOM.canvas.height = window.innerHeight - 20;
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.style.background = "black";
+        function getSeason(month){
+            if (month === 12 || month === 1 || month === 2 )return"冬";
+            if(3 <= month && month <= 5)return"春";
+            if(6 <= month && month <= 8)return"夏";
+            if(9 <= month && month <= 11)return"秋";
+        }
+        function getTodaystars(month){
+            const season = getSeason(month);
+            return stars.filter(star => {
+                return star.season === season || star.season ==="通年";
+            });
+        }
+        function showAll(){
+            results.forEach(star => {
+                const li = document.createElement("li");
+                const spanName = document.createElement("span");
+                const spanDesc = document.createElement("span");
+                const btn = document.createElement("button");
+                btn.classList.add("btn");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴表示";
+                btn.addEventListener("click",function(){
+                    spanDesc.textContent = spanDesc.textContent? "": star.description;
+                    drawStars(star);
+                }); 
+                li.append(spanName,spanDesc,btn);
+                DOM.list.appendChild(li);
+            });
+        }
+        function drawStars(star){
+            pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                if(!star.stars)return;
+                star.stars.forEach(point => {
+                    pen.beginPath();
+                    pen.arc(point.x,point.y,3,0,Math.PI * 2);
+                    pen.fillStyle = "white";
+                    pen.fill();
+                });
+        }
+        showAll();
+    </script>
+</html>
