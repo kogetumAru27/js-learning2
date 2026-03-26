@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <ul id="list"></ul>
+        <canvas id="sky"></canvas>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            desc: document.getElementById("desc"),
+            list: document.getElementById("list"),
+            canvas: document.getElementById("sky")
+        }
+        const stars = [{
+            name:"オリオン座",
+            season: "通年",//実際は冬だが表示できるように通年に変えた
+            description: "冬の代表的な星座で、三ツ星が一直線に並ぶのが特徴。",
+            stars: [{x: 300, y:200,radius: 5,color:"orange"},{x:500 ,y:250,radius:3,color:"orange"},{x:400,y:400,radius:4,color:"orange"},{x:500,y:600,radius: 3,color:"orange"},{x:300,y:600,radius: 5,color:"blue"},{x:320,y:450,radius: 5,color:"blue"},{x:360,y:420,radius: 4,color:"white"}],
+            lines: [{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6},{from:6,to:2},{from:5,to:0}]
+        },{
+            name:"北斗七星",
+            season: "春",
+            description: "北斗七星は、おおぐま座の腰から尻尾にかけて並ぶ、2〜3等星の7つの星で構成された「柄杓（ひしゃく）」のような形の星列です",
+            stars: [{x:200,y:250,radius: 5,color:"white"},{x:300,y:320,radius: 5,color:"white"},{x:400,y:380,radius: 5,color:"white"},{x:500,y:370,radius: 5,color:"white"},{x:530,y:440,radius: 5,color:"white"},{x:650,y:400,radius: 5,color:"white"},{x:610,y:315,radius: 5,color:"white"}],
+            lines:[{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6}]
+        },
+        {
+            name:"宇宙",
+            season: "通年",
+            description: "はな",
+        }];
+        const background = [];
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        let currentStar = null;
+        const pen = DOM.canvas.getContext("2d");
+        DOM.canvas.width = window.innerWidth - 10;
+        DOM.canvas.height = window.innerHeight - 10;
+        DOM.canvas.style.background = "black";
+        //関数
+        function getSeason(month){
+            if(month === 12 || month === 1 || month === 2)return"冬";
+            if(3 <= month && month <= 5)return"春";
+            if(6 <= month && month <= 8)return"夏";
+            if(9 <= month && month <= 11)return"秋";
+        }
+        function getTodaystars(month){
+            const season = getSeason(month);
+            return stars.filter(star => {
+                return star.season === season || star.season === "通年";
+            });
+        }
+        const results = getTodaystars(month);
+        function showAll(){
+            results.forEach(star => {
+                const li = document.createElement("li");
+                const spanName = document.createElement("span");
+                const spanDesc = document.createElement("span");
+                const btn = document.createElement("button");
+                btn.classList.add("btn");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴表示"
+                btn.addEventListener("click",function(){
+                    pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                    drawBackgroundstars();
+                    if(currentStar === star){
+                        currentStar = null; //dateに関係画面いは関係ない
+                        spanDesc.textContent = "";//画面に関係ありだから消えるnullなくても
+                    }else{
+                        drawStars(star);//画面に関係ありだから消えるnullなくても
+                        canvasText(star);//画面に関係ありだから消えるnullなくても
+                        currentStar = star;//dateに関係画面いは関係ない
+                        spanDesc.textContent = star.description;//画面に関係ありだから消えるnullなくても
+                    }
+                });
+                li.append(spanName,spanDesc,btn);
+                DOM.list.appendChild(li);
+            });
+        }
+        function drawStars(star){
+            if(!star.stars)return;
+            star.stars.forEach(point => {
+                pen.beginPath();
+                pen.arc(point.x,point.y,point.radius,0,Math.PI * 2);
+                pen.fillStyle = point.color;
+                pen.fill();
+            });
+            if(!star.lines)return;
+            star.lines.forEach(line => {
+                const p1 = star.stars[line.from];
+                const p2 = star.stars[line.to];
+                pen.beginPath();
+                pen.moveTo(p1.x,p1.y);
+                pen.lineTo(p2.x,p2.y);
+                pen.strokeStyle = "yellow";
+                pen.stroke();
+            });
+        }
+        function canvasText(star){
+            pen.fillStyle = "white";
+            pen.font = "20px sans-serif";
+            pen.fillText(star.name,50,50);
+        }  
+        function createBackgroundstars(){
+            for(let i = 0; i < 150; i++){
+            background.push({
+                x: Math.random() * DOM.canvas.width,
+                y: Math.random() * DOM.canvas.height,
+                radius:Math.random() * 2 + 0.5,
+                alpha: Math.random() * 0.8 + 0.2
+            });
+            }
+        }      
+        function drawBackgroundstars(){
+            background.forEach(star =>{
+            pen.beginPath();
+            pen.globalAlpha = star.alpha;
+            pen.arc(star.x,star.y,star.radius,0,Math.PI * 2);
+            pen.fillStyle = "white";
+            pen.fill(); 
+            });
+            pen.globalAlpha = 1;
+        }
+        showAll();
+        createBackgroundstars();
+        drawBackgroundstars();
+    </script>
+</html>
