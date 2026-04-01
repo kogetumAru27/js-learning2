@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>Star site</title>
+        <style>
+            body {
+                background: black;
+                color: white;
+                font-family: sans-serif;
+            }
+            button {
+                background-color: #1a1a2e;
+                color: #aac4ff;
+                border: 1px solid white;
+                border-radius: 4px;
+                padding: 4px 10px;
+                cursor: pointer;
+            }
+            button:hover{
+                background: #2a2a4e;
+                color: #f9d56e;
+            }
+            ul {
+                list-style: none;
+                padding: 0;
+            }
+            li {
+                display: flex;
+                gap: 10px;
+                margin: 5px 0;
+                align-items: flex-start;
+                padding: 5px;
+                justify-content: space-between;
+            }
+            li div {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                max-width: 180px;
+            }
+            li span:first-child {
+                font-weight: bold;
+                color: #f9d56e;
+            }
+            li span:last-child {
+                font-size: 12px;
+                color: #ccc;
+                line-height: 1.4;
+            }
+            h1 {
+                font-size: 24px;
+                color: #aac4ff;
+                }
+            .container {
+                    display: flex;
+                    gap: 20px;
+                }
+            .season_btns{
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .seasonbtn{
+                font-size: 14px;
+                padding: 6px 16px;
+            }
+            canvas {
+                border: 1px solid white;
+            }
+            .sidebar{
+                width: 250px;
+            }
+            li:hover {
+            background: rgba(255,255,255,0.1);
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="desc"></p>
+        <div class="container">
+            <div class="sidebar">
+                <ul id="list"></ul>
+            </div>
+        <canvas id="sky"></canvas>
+        </div>
+        <div class="season_btns">
+        <button class="seasonbtn" data-season="春">春</button>
+        <button class="seasonbtn" data-season="夏">夏</button>
+        <button class="seasonbtn" data-season="秋">秋</button>
+        <button class="seasonbtn" data-season="冬">冬</button>
+        <button class="seasonbtn" data-season="通年">通年</button>
+        </div>
+        <script>
+            const DOM = {
+                name: document.getElementById("name"),
+                desc: document.getElementById("desc"),
+                list: document.getElementById("list"),
+                canvas:document.getElementById("sky"),
+                seasonbtn: document.querySelectorAll(".seasonbtn")
+            }
+            //配列データ
+            const stars = [{
+                name:"オリオン座",
+            season: "冬",//実際は冬だが表示できるように通年に変えた
+            description: "冬の代表的な星座で、三ツ星が一直線に並ぶのが特徴。",
+            stars: [{x: 300, y:200,radius: 5,color:"orange"},{x:500 ,y:250,radius:3,color:"orange"},{x:400,y:400,radius:4,color:"orange"},{x:500,y:600,radius: 3,color:"orange"},{x:300,y:600,radius: 5,color:"blue"},{x:320,y:450,radius: 5,color:"blue"},{x:360,y:420,radius: 4,color:"white"}],
+            lines: [{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6},{from:6,to:2},{from:5,to:0}]
+        },{
+            name:"北斗七星",
+            season: "春",
+            description: "北斗七星は、おおぐま座の腰から尻尾にかけて並ぶ、2〜3等星の7つの星で構成された「柄杓（ひしゃく）」のような形の星列です",
+            stars: [{x:200,y:250,radius: 5,color:"white"},{x:300,y:320,radius: 5,color:"white"},{x:400,y:380,radius: 5,color:"white"},{x:500,y:370,radius: 5,color:"white"},{x:530,y:440,radius: 5,color:"white"},{x:650,y:400,radius: 5,color:"white"},{x:610,y:315,radius: 5,color:"white"}],
+            lines:[{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6}]
+        },
+        {
+            name:"ふたご座",
+            season: "冬",
+            description: "双子座は、冬の夜空に1等星ポルックス（オレンジ色）と2等星カストル（白色）が並んで輝く、ギリシャ神話の兄弟に由来する星座。",
+            stars:[{x:345,y:175,radius:5,color:"orange"}/*0*/,/*1*/{x:470,y:160,radius:5,color:"blue"},/*2*/{x:500,y:290,radius:5,color:"white"},/*3*/{x:630,y:310,radius:5,color:"white"},/*4*/{x:510,y:430,radius:5,color:"white"},/*5*/{x:570,y:570,radius:5,color:"white"},/*6*/{x:320,y:340,radius:5,color:"white"},/*7*/{x:220,y:410,radius:5,color:"white"},/*8*/{x:360,y:540,radius:5,color:"white"},/*9*/{x:260,y:550,radius:5,color:"white"}],
+            lines:[{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:2,to:4},{from:4,to:5},{from:0,to:6},{from:6,to:7},{from:6,to:8},{from:8,to:9},]
+        },
+        {
+            name:"さそり座",
+            season: "夏",//実際は夏
+            description:"北半球では夏の大三角と共に夏の夜空の見どころとして親しまれている。全天に21個ある1等星[注 1]の1つ α星アンタレスを始め、数多くの明るく見える星が天の川の濃い領域を跨ぐようにS字型を描いて並んでおり、古代ギリシアの文献では「全天で最も明るい星座」と呼ばれていた",
+            stars: [{x:490,y:160,radius:5,color:"orange"}/*0*/,/*1*/{x:540,y:260,radius:5,color:"blue"},/*2*/{x:620,y:370,radius:5,color:"blue"},/*3*/{x:390,y:310,radius:7,color:"red"},/*4*/{x:290,y:410,radius:5,color:"white"},/*5*/{x:250,y:620,radius:5,color:"white"},/*6*/{x:125,y:660,radius:5,color:"white"},/*7*/{x:120,y:540,radius:5,color:"white"},/*8*/{x:35,y:560,radius:5,color:"white"},],
+            lines: [{from:0,to:1},{from:1,to:2},{from:1,to:3},{from:3,to:4},{from:4,to:5},{from:5,to:6},{from:6,to:7},{from:7,to:8},]
+
+        },
+        {
+            name:"こと座", 
+            season: "夏",//実際は夏
+            description:"こと座は夏の大三角形の一角である青白く輝く１等星「ベガ（織姫）」が目印の小さな星座です。ベガの近くにある小さな平行四辺形の星の並びが特徴" ,
+    /*0*/   stars:[{x:460,y:180,radius:5,color:"white"},/*1*/{x:530,y:290,radius:8,color:"blue"},/*2*/{x:380,y:390,radius:5,color:"white"},/*3*/{x:315,y:550,radius:5,color:"white"},/*4*/{x:220,y:430,radius:5,color:"white"},/*2*/{x:150,y:590,radius:5,color:"white"},],
+            lines: [{from:0,to:1},{from:1,to:2},{from:2,to:3},{from:2,to:4},{from:4,to:5},{from:3,to:5}]
+            }];
+            const background = [];
+            //日付
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            //最初はからにしておく
+            let currentStar = null;
+            //canvas
+            const pen = DOM.canvas.getContext("2d");
+            DOM.canvas.width = 900;
+            DOM.canvas.height = 700;
+            DOM.canvas.style.background = "black";
+            //関数
+            function getSeason(month){
+                if (month === 12 || month === 1 || month === 2)return"冬";
+                if(3 <= month && month <= 5)return"春";
+                if(6 <= month && month <= 8)return"夏";
+                if(9 <= month && month <= 11)return"秋";
+            }
+            function getTodaystars(month){
+                const season = getSeason(month);
+                return stars.filter(star => {
+                    return star.season === season || star.season === "通年";
+                });
+            }
+            const results = getTodaystars(month);
+            //全て表示関数
+            function showAll(results){
+                DOM.list.innerHTML = "";                
+                results.forEach(star => {
+                const li = document.createElement("li");
+                const spanDesc = document.createElement("span");
+                const spanName = document.createElement("span");
+                const btn = document.createElement("button");
+                const textBox = document.createElement("div");
+                spanName.textContent = star.name;
+                spanDesc.textContent = "";
+                btn.textContent = "特徴表示"
+                btn.classList.add("btn");
+                btn.addEventListener("click",function(){
+                    pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                    drawBackgroundstars();
+                    if(currentStar === star){
+                        currentStar = null;
+                        spanDesc.textContent = ""
+                    }else{
+                        currentStar = star;
+                        spanDesc.textContent = star.description;
+                        textCanvas(star);
+                        drawStars(star);
+                    }
+                });
+                textBox.append(spanName,spanDesc);
+                li.append(textBox,btn);
+                DOM.list.appendChild(li);
+                })
+            }
+            //canvasに表示
+            function drawStars(star){
+                if(!star.stars)return;
+                star.stars.forEach(point => {
+                    pen.beginPath();
+                    pen.arc(point.x,point.y,point.radius,0,Math.PI * 2);
+                    pen.fillStyle = point.color;
+                    pen.fill();
+                });
+                //線をつけ星座にする
+                if(!star.lines)return;
+                star.lines.forEach(line => {
+                    const p1 = star.stars[line.from];
+                    const p2 = star.stars[line.to];
+                    pen.beginPath();
+                    pen.moveTo(p1.x,p1.y);
+                    pen.lineTo(p2.x,p2.y);
+                    pen.strokeStyle = "yellow";
+                    pen.stroke();
+                });
+            }
+            //背景をつけより天体に
+            function createBackgroundstars(){
+                for (let i = 0; i < 200; i++) {
+                    background.push({
+                        x: Math.random() * DOM.canvas.width,
+                        y: Math.random() * DOM.canvas.height,
+                        radius: Math.random() * 2 + 0.5,
+                        alpha: Math.random() * 0.8 + 0.2
+                    });
+                    
+                }
+            }
+            function drawBackgroundstars(){
+                background.forEach(star => {
+                    pen.beginPath();
+                    pen.globalAlpha = star.alpha;
+                    pen.arc(star.x,star.y,star.radius,0,Math.PI * 2);
+                    pen.fillStyle = "white";
+                    pen.fill();
+                });
+                pen.globalAlpha = 1;
+            }
+            //canvas内にテキスト表示
+            function textCanvas(star){
+                pen.fillStyle = "white";
+                pen.font = "40px sans-serif";
+                pen.fillText(star.name,50,50);
+            }
+            //イベント、座標検索と季節ボタン
+            DOM.canvas.addEventListener("click",function(e){
+                console.log(e.offsetX,e.offsetY);
+               /* pen.beginPath();
+                pen.arc(e.offsetX,e.offsetY,7,0,Math.PI * 2);
+                pen.fillStyle = "red";
+                pen.fill();*/
+            });
+            DOM.seasonbtn.forEach(btn => {
+                btn.addEventListener("click",function(e){
+                    const seasonData = e.target.dataset.season
+                    DOM.list.innerHTML = "";
+                    pen.clearRect(0,0,DOM.canvas.width,DOM.canvas.height);
+                    drawBackgroundstars();
+                    currentStar = null;
+                    const filtered = stars.filter(star => {
+                        return star.season === seasonData || star.season === "通年";
+                    }); 
+                    showAll(filtered);             
+                });
+            });
+            //APIあなたの位置で今日見られる星がわかる
+            function getlocation(){
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        position => resolve(position),
+                        error => reject(error)
+                    );
+                });
+            }
+            async function main() {
+                try{
+                    const locationData = await getlocation();
+                    const lat = locationData.coords.latitude;
+                    const lng = locationData.coords.longitude;
+                    DOM.name.textContent = "位置情報取得中...";
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                    const result = await response.json();
+                    DOM.name.textContent = (result.address.town || result.address.city || "現在地") + "から見える星"
+                    console.log(result);
+                    console.log(lat,lng);
+                }catch(error){
+                    console.log("位置情報取得の失敗", error);
+                    alert("設定で位置情報がオンになっているか確認してください");
+                }    
+            }
+            createBackgroundstars();
+            drawBackgroundstars();
+            showAll(results);
+            main();
+        </script>
+    </body>
+</html>
