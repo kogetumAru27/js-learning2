@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>weather app</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="weather">天気</p>
+        <p id="temp">気温</p>
+        <p id="humd">湿度</p>
+        <p id="rain">降水量</p>
+        <ul id="list"></ul>
+        <button id="today">今日</button>
+        <button id="tomorrow">明日</button>
+        <button id="dayAfterTomorrow">明後日</button>
+        <button id="week">１週間の天気</button>
+    </body>
+    <script>
+        const DOM = {
+            name: document.getElementById("name"),
+            weather:document.getElementById("weather"),
+            temp: document.getElementById("temp"),
+            humd: document.getElementById("humd"),
+            rain:document.getElementById("rain"),
+            list: document.getElementById("list"),
+            today: document.getElementById("today"),
+            tomorrow: document.getElementById("tomorrow"),
+            dayAfterTomorrow: document.getElementById("dayAfterTomorrow"),
+            week: document.getElementById("week")
+        }
+        //現在位置の取得
+        function getLocation(){
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve(position),
+                    error => reject(error)
+                );
+            });
+        }
+        //成功、失敗での処理
+       async function main(){
+            try{
+                const Location = await getLocation();
+                const lat = Location.coords.latitude;
+                const lng = Location.coords.longitude;
+                DOM.name.textContent = "位置情報取得中・・・";
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                const results = await response.json();
+                DOM.name.textContent = (results.address?.town || results.address?.city || "現在地") + "の天気予報";
+                console.log(results);
+                //天気、降水量などの情報取得
+                const responseW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,precipitation,relativehumidity_2m&hourly=temperature_2m,weathercode,precipitation`);
+                const result = await responseW.json();
+                console.log(result);
+                const current = result.current;
+                DOM.weather.textContent = "天気" + weathercodeChange(current.weathercode);
+                DOM.temp.textContent = "気温" + current.temperature_2m + "℃";
+                DOM.humd.textContent = "湿度" + current.relativehumidity_2m + "%";
+                DOM.rain.textContent = "降水量" + current.precipitation + "mm";
+                //日付ごとの天気の取得
+                const hourly = result.hourly;
+                const today = new Date().toISOString().split("T")[0];
+                const tomo = new Date()
+                const dayAfter = new Date();
+                tomo.setDate(tomo.getDate() + 1);
+                dayAfter.setDate(dayAfter.getDate() + 2);
+                const tomorrow = tomo.toISOString().split("T")[0]
+                const dayAfterTomorrow = dayAfter.toISOString().split("T")[0];
+                //ボタンを押した時に明日、明後日に変わるイベント
+                DOM.list.innerHTML = "";
+                showAll(hourly,today);
+                DOM.today.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,today);
+                })
+                DOM.tomorrow.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,tomorrow);
+                });
+                DOM.dayAfterTomorrow.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,dayAfterTomorrow);
+                });
+                showWeeks(hourly);
+
+            }catch(error){
+                console.log("失敗:",error);
+                alert("位置情報の取得に失敗");
+            }
+            
+        }
+        //天気をコードから変換
+        function weathercodeChange(code){
+                if(code === 0 || code === 1)return"☀️晴れ";
+                if(code === 2) return "⛅晴れ時々曇り";
+                if(code === 3) return "☁️曇り";
+                if(code === 48 || code === 45)return"🌫️霧";
+                if(code === 51 || code === 53 || code === 55)return"🌦️霧雨";
+                if(code === 61 || code === 63 || code === 65)return"🌧️雨";
+                if(code === 71 || code === 73 || code === 75)return"⛄️雪";
+                if(code === 80 || code === 81 || code === 82)return"🌦️にわか雨";
+                if(code === 95)return"⛈️雷雨";
+            }
+        //全表示からボタンで切り替え日付で絞りたいからtimeを使う。weathercode、temperature_2mでもできるが気温天気でしか比べられないから意味があまりない
+        function showAll(hourly,date){
+            hourly.time.forEach((item,i)=> {
+                if(item.split("T")[0] !== date)return;
+                const li = document.createElement("li");
+                const temr = hourly.temperature_2m[i];
+                const weth = weathercodeChange(hourly.weathercode[i]);
+                const prec = hourly.precipitation[i]
+                li.textContent = item + ": " + weth + ": " + temr + ": " + prec;
+                DOM.list.appendChild(li);      
+            });
+        }
+        function showWeeks(hourly){
+            //１週間分の日にちを取得
+            const weeks = [];
+            for (let i = 0; i < 7; i++) {
+                const dte = new Date();
+                dte.setDate(dte.getDate() + i);
+                weeks.push(dte.toISOString().split("T")[0]);
+            }
+            //その日付の12:00の天気をもとに１週間分の天気を表示
+            DOM.week.addEventListener("click",function(){
+                DOM.list.innerHTML = ""
+                weeks.forEach(week => {
+                const index = hourly.time.indexOf(week + "T12:00");//配列の何番目にあるかを返すメソッドindexOf,indexに「12:00の行番号」が入る例8など
+                if(index !== -1){//配列にマイナス１がつくときは見つからないとき
+                    const li = document.createElement("li");
+                    const tempr = hourly.temperature_2m[index];//ここのindexはconst indexと同じ番号が入る
+                    const weat = weathercodeChange(hourly.weathercode[index]);
+                    li.textContent = weat + ":" + tempr;
+                    DOM.list.appendChild(li)
+                }    
+            });
+            });
+        }
+    main();
+    </script>
+</html>

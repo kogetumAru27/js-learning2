@@ -89,6 +89,7 @@
             if(todo.done) li.classList.add("done");
             li.append(span,comp_btn,delte_btn,change_btn);
             return li;
+           
         }
         function isVisibleTodo(todo,searchWord){
             if(filter === "complete" && !todo.done) return false;

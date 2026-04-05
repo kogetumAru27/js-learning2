@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>weather app</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="weather">天気</p>
+        <p id="temp">気温</p>
+        <p id="humd">湿度</p>
+        <p id="rain">降水量</p>
+        <ul id="list"></ul>
+        <button class="tomorrow">明日</button>
+        <button class="totomorrow">明明後日</button>
+        <script>
+            const DOM = {
+                name: document.getElementById("name"),
+                weather: document.getElementById("weather"),
+                temp: document.getElementById("temp"),
+                humd: document.getElementById("humd"),
+                rain: document.getElementById("rain"),
+                list: document.getElementById("list"),
+                tomorrow: document.querySelector(".tomorrow"),
+                totomorrow: document.querySelector(".totomorrow")
+            }
+            //位置情報取得
+            function getLocation(){
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        position => resolve(position),
+                        error => reject(error)
+                    );
+                });
+            }
+            //位置情報と今の位置の天気
+            async function main() {
+                try{
+                    //今日の日付取得
+                    const today = new Date().toISOString().split("T")[0];
+                    //明日
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const Tomorrow = tomorrow.toISOString().split("T")[0];
+                    //明明後日
+                    const totomorrow = new Date();
+                    totomorrow.setDate(totomorrow.getDate() + 2);
+                    const dayAfterTomorrow = totomorrow.toISOString().split("T")[0];
+                    const location = await getLocation();
+                    const lat = location.coords.latitude;
+                    const lng = location.coords.longitude;
+                    //位置情報
+                    DOM.name.textContent = "位置情報取得中・・・";
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                    const results = await response.json();
+                    DOM.name.textContent = (results.address?.town || results.address?.city || "現在位置") + "の天気予報";
+                    console.log(results);
+                    //天気取得
+                    const responseWeat = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,precipitation,relativehumidity_2m&hourly=temperature_2m,weathercode,precipitation`);
+                    const result = await responseWeat.json();
+                    console.log(result);
+                    const current = result.current;
+                    const weatherDate = weathercodeChange(current.weathercode);//weathercodeの数字が欲しいので引数に入れる
+                    DOM.weather.textContent = "天気" + weatherDate
+                    DOM.temp.textContent = "気温" + current.temperature_2m + "℃";
+                    DOM.humd.textContent = "湿度" + current.relativehumidity_2m + "%";
+                    DOM.rain.textContent = "降水量" + current.precipitation + "mm";
+                    //時間ごとの天気の変化
+                    const hourly = result.hourly;
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,today);
+                    //イベント
+                    DOM.tomorrow.addEventListener("click",function(){
+                        DOM.list.innerHTML = "";
+                        showAll(hourly,Tomorrow);
+                    });
+                    DOM.totomorrow.addEventListener("click",function(){
+                        DOM.list.innerHTML = "";
+                        showAll(hourly,dayAfterTomorrow);
+                    });
+
+            }catch(error){
+                    console.log("失敗: ",error);
+                    alert("位置情報取得失敗");
+                }
+                
+            }
+            //天気のコードを文字に変換
+            function weathercodeChange(code){
+                if(code === 0)return"快晴";
+                if(1 <= code && code <= 3)return"晴れ";
+                if(code === 48 || code === 45)return"霧";
+                if(code === 51 || code === 53 || code === 55)return"霧雨";
+                if(code === 61 || code === 63 || code === 65)return"雨";
+                if(code === 71 || code === 73 || code === 75)return"雪";
+                if(code === 80 || code === 81 || code === 82)return"にわか雨";
+                if(code === 95)return"雷雨";
+            }
+            //全表示関数
+            function showAll(hourly,date){
+                hourly.time.forEach((time,i) => {
+                    if(time.split("T")[0] !== date) return;
+                    const li = document.createElement("li");
+                    const tempr = hourly.temperature_2m[i];
+                    const weatherCode = weathercodeChange(hourly.weathercode[i]);
+                    li.textContent = time + " " + tempr + "℃ " + weatherCode;
+                    DOM.list.appendChild(li);
+                    });
+            }
+            main();
+        </script>
+    </body>
+</html>

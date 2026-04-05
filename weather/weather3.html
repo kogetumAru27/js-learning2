@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>weather app</title>
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <p id="weather">天気</p>
+        <p id="temp">気温</p>
+        <p id="humd">湿度</p>
+        <p id="rain">降水量</p>
+        <p id="starCatch">星空</p>
+        <p id="nightStar">今夜の星空</p>
+        <ul id="list"></ul>
+        <button id="today">今日</button>
+        <button id="tomorrow">明日</button>
+        <button id="dayAfterTomorrow">明後日</button>
+        <button id="week">１週間の天気</button>
+    </body>
+    <script>
+        //DOM取得
+        const DOM = {
+            name: document.getElementById("name"),
+            weather:document.getElementById("weather"),
+            temp: document.getElementById("temp"),
+            humd: document.getElementById("humd"),
+            rain:document.getElementById("rain"),
+            starCatch: document.getElementById("starCatch"),
+            nightStar:document.getElementById("nightStar"),
+            list: document.getElementById("list"),
+            today: document.getElementById("today"),
+            tomorrow: document.getElementById("tomorrow"),
+            dayAfterTomorrow: document.getElementById("dayAfterTomorrow"),
+            week: document.getElementById("week")
+        }
+        //位置情報取得関数
+        function getlocation(){
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve(position),
+                    error => reject(error)
+                );
+            });
+        }
+        //main関数
+        async function main() {
+            try{
+                const LocationData = await getlocation();
+                const lat = LocationData.coords.latitude;
+                const lng = LocationData.coords.longitude;
+                //地名取得のAPI
+                DOM.name.textContent = "位置情報取得中"
+                const city = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                const results = await city.json();
+                console.log(results);
+                DOM.name.textContent = (results.address?.town || results.address?.city || "現在地") + "の天気予報";
+                //天気データを取得API
+                const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,precipitation,relativehumidity_2m,cloudcover&hourly=temperature_2m,weathercode,precipitation,cloudcover`);
+                const result = await weather.json();
+                console.log(result);
+                const current = result.current;
+                DOM.temp.textContent ="気温"+ ": " +current.temperature_2m + "℃";
+                DOM.humd.textContent ="湿度"+": " + current.relativehumidity_2m +"%";
+                DOM.rain.textContent ="降水量"+ ": " +current.precipitation  + "mm";
+                DOM.starCatch.textContent ="星空"+": " + cloudCover(current.cloudcover);
+                DOM.weather.textContent ="天気"+": " +weathercodeChange(current.weathercode);
+                //日付ごとにボタンを押し一時間ごとの天気
+                const hourly = result.hourly;
+                const today = new Date().toISOString().split("T")[0];
+                const tom = new Date();
+                tom.setDate(tom.getDate() + 1);
+                const tomorrow = tom.toISOString().split("T")[0];
+                const dayAf = new Date();
+                dayAf.setDate(dayAf.getDate() + 2);
+                const dayAfterTomorrow = dayAf.toISOString().split("T")[0];
+                //表示、イベント
+                showAll(hourly,today);
+                DOM.today.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,today);
+                    nightcloudCover(hourly,today);
+                });
+                DOM.tomorrow.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,tomorrow);
+                    nightcloudCover(hourly,tomorrow);
+                });
+                DOM.dayAfterTomorrow.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,dayAfterTomorrow);
+                    nightcloudCover(hourly,dayAfterTomorrow);
+                });
+                showWeeks(hourly);
+                nightcloudCover(hourly,today);
+                
+            }catch(error){
+                console.log("失敗:" ,error);
+                alert("位置情報取得失敗")
+            };
+        }
+        //天気コードを文字に変換する関数
+        function weathercodeChange(code){
+                if(code === 0 || code === 1)return"☀️晴れ";
+                if(code === 2) return "⛅晴れ時々曇り";
+                if(code === 3) return "☁️曇り";
+                if(code === 48 || code === 45)return"🌫️霧";
+                if(code === 51 || code === 53 || code === 55)return"🌦️霧雨";
+                if(code === 61 || code === 63 || code === 65)return"🌧️雨";
+                if(code === 71 || code === 73 || code === 75)return"⛄️雪";
+                if(code === 80 || code === 81 || code === 82)return"🌦️にわか雨";
+                if(code === 95)return"⛈️雷雨";
+        }
+        //星が見えるかどうか判定
+        function cloudCover(code){
+            if(0 <= code && code <= 20)return"よく見える";
+            if(21 <= code && code <= 50)return"見える"
+            if(51 <= code && code <= 80)return"見えにくい";
+            if(81 <= code && code <= 100)return"見えない";
+        }
+        //次の日の夜に星が見えるか
+        function nightcloudCover(hourly,date){
+           const index = hourly.time.indexOf(date + "T21:00");
+           if(index !== -1){
+            const starCatch = cloudCover(hourly.cloudcover[index]);
+            DOM.nightStar.textContent = "今夜の星空: " + starCatch
+           }
+        }
+        //一時間ごとに表示
+        function showAll(hourly,date){
+            hourly.time.forEach((time,i) => {
+                if(time.split("T")[0] !== date)return;
+                const li = document.createElement("li");
+                const weather = weathercodeChange(hourly.weathercode[i]);
+                const temp = hourly.temperature_2m[i];
+                const rain = hourly.precipitation[i];
+                li.textContent = weather + ":" + temp + "℃"+":" + rain + "mm";
+                DOM.list.appendChild(li);
+            });
+        }
+        //1週間表示する関数
+        function showWeeks(hourly){
+            const weeks = [];
+            for (let i = 0; i < 7; i++) {//１週間分の日付のデータ
+                const to = new Date();
+                to.setDate(to.getDate() + i);
+                weeks.push(to.toISOString().split("T")[0]);      
+            }
+            //さっき作った配列に時間をつける
+            DOM.week.addEventListener("click",function(){
+                DOM.list.innerHTML = "";
+                weeks.forEach(week => {
+                const index = hourly.time.indexOf(week + "T12:00");
+                if(index !== -1){
+                    const li = document.createElement("li");
+                    const weather = weathercodeChange(hourly.weathercode[index]);
+                    const temp = hourly.temperature_2m[index];
+                    const rain = hourly.precipitation[index];
+                    li.textContent = weather + ":" + temp + "℃"+":" + rain + "mm";
+                    DOM.list.appendChild(li)
+                }
+            });
+            });
+        }
+        main();
+    </script>
+</html>
