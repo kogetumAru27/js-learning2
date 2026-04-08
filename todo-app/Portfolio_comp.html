@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Portfolio</title>
+        <link rel="stylesheet" href="style_todo.css">
     </head>
     <body>
         <input type="text" class="text">
@@ -12,11 +13,13 @@
             <option value="middle">中</option>
             <option value="low">低</option>
         </select>
+        <div class="buttons">
         <button class="addBtn">追加</button>
         <button class="allBtn">全て</button>
         <button class="compBtn">完了</button>
         <button class="incompBtn">未完了</button>
-        <button class="compDelet">完了タスク削除</button>
+        <button class="compDelete">完了タスク削除</button>
+        </div>
         <input type="text" class="search" placeholder="検索">
         <ul class="list"></ul>
         <div class="counter">
@@ -35,7 +38,7 @@
             allBtn: document.querySelector(".allBtn"),
             compBtn: document.querySelector(".compBtn"),
             incompBtn: document.querySelector(".incompBtn"),
-            compDelt: document.querySelector(".compDelet"),
+            compDelete: document.querySelector(".compDelete"),
             list: document.querySelector(".list"),
             search: document.querySelector(".search"),
             counter:document.querySelector(".counter"),
@@ -78,7 +81,7 @@
             const comp_btn = document.createElement("button");
             const delte_btn = document.createElement("button");
             const change_btn = document.createElement("button");
-            span.textContent = `(${priorityMap[todo.priority]}${todo.text}${todo.deadline})`;
+            span.textContent = `(${priorityMap[todo.priority] || ""} ${todo.text} ${todo.deadline || ""})`;
             li.dataset.id = todo.id;
             comp_btn.textContent = todo.done?"未完了":"完了";
             delte_btn.textContent = "削除";
@@ -158,6 +161,7 @@
             renderTodos();
         });
         window.addEventListener("DOMContentLoaded",function(){
+            localStorage.removeItem("todos");
             loadTodos();
             renderTodos();
             new Sortable(DOM.list,{
@@ -190,7 +194,7 @@
             filter = "incomplete";
             renderTodos();
         });
-        DOM.compDelet.addEventListener("click",function(){
+        DOM.compDelete.addEventListener("click",function(){
             todos = todos.filter(function(todo){
                 return !todo.done
             });
@@ -198,25 +202,4 @@
             renderTodos();
         });
     </script>
-    <style>
-              li.done span{
-        text-decoration: line-through;
-        color: gray;
-        }
-        body{
-        font-family: sans-serif;
-        max-width: 600px;
-        margin: 40px auto;
-        }
-
-        li{
-        display:flex;
-        gap:10px;
-        margin:5px 0;
-        }
-
-        button{
-        cursor:pointer;
-        }
-    </style>
 </html>

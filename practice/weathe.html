@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>weather app</title>
+        <link rel="stylesheet" href="practice.css">
+    </head>
+    <body>
+        <h1 id="name"></h1>
+        <div class="weathers">
+        <p id="weather">天気</p>
+        <p id="temp">気温</p>
+        <p id="humd">湿度</p>
+        <p id="rain">降水量</p>
+        <p id="starCatch">星空</p>
+        <p id="nightStar">今夜の星空</p>
+        </div>
+        <ul id="list"></ul>
+        <div class="buttons">
+            <button id="today_btn">今日</button>
+            <button id="tomorrow_btn">明日</button>
+            <button id="dayAfterTomorrow_btn">明後日</button>
+            <button id="week_btn">１週間の天気</button>
+        </div>
+        <script>
+            const DOM = {
+                name:document.getElementById("name"),
+                weather: document.getElementById("weather"),
+                temp: document.getElementById("temp"),
+                humd: document.getElementById("humd"),
+                rain:document.getElementById("rain"),
+                starCatch: document.getElementById("starCatch"),
+                nightStar: document.getElementById("nightStar"),
+                list: document.getElementById("list"),
+                today_btn:document.getElementById("today_btn"),
+                tomorrow_btn:document.getElementById("tomorrow_btn"),
+                dayAfterTomorrow_btn: document.getElementById("dayAfterTomorrow_btn"),
+                week_btn: document.getElementById("week_btn")
+            }
+            //位置情報取得
+            function getLocation(){
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        position => resolve(position),
+                        error => reject(error)
+                    );
+                });
+            }
+            //main関数
+            async function main() {
+                try{
+                const LocationData = await getLocation();
+                const lat = LocationData.coords.latitude;
+                const lng = LocationData.coords.longitude;
+                DOM.name.textContent = "位置情報取得中・・・";
+                const city = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                const results = await city.json();
+                const address = results.address;
+                DOM.name.textContent = (address?.city || address?.town || "現在地") + "の天気予報";
+                //天気
+                const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,precipitation,relativehumidity_2m,cloudcover&hourly=temperature_2m,weathercode,precipitation,cloudcover`);
+                const result = await weather.json();
+                const current = result.current;
+                DOM.weather.textContent ="天気: " + changeWeathercode(current.weathercode);
+                DOM.temp.textContent = "気温: " + current.temperature_2m + "℃";
+                DOM.humd.textContent = "湿度: " + current.relativehumidity_2m +"%";
+                DOM.rain.textContent = "降水量: " + current.precipitation  + "mm";
+                DOM.starCatch.textContent = "星空: " + starCatch(current.cloudcover);
+                //日付の取得,hourly
+                const hourly = result.hourly;
+                const today = new Date().toISOString().split("T")[0];
+                const to = new Date();
+                to.setDate(to.getDate() + 1);
+                const tomorrow = to.toISOString().split("T")[0];
+                const dayAf = new Date();
+                dayAf.setDate(dayAf.getDate() + 2);
+                const dayAfterTomorrow = dayAf.toISOString().split("T")[0];
+                //表示用
+                showAll(hourly,today);
+                nightcloudCover(hourly,today);
+                //イベント
+                DOM.today_btn.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,today);
+                    nightcloudCover(hourly,today);
+                });
+                DOM.tomorrow_btn.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,tomorrow);
+                    nightcloudCover(hourly,tomorrow);
+                });
+                DOM.dayAfterTomorrow_btn.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    showAll(hourly,dayAfterTomorrow);
+                    nightcloudCover(hourly,dayAfterTomorrow);
+                });
+                DOM.week_btn.addEventListener("click",function(){
+                    DOM.list.innerHTML = "";
+                    weeks(hourly);
+                });
+                }catch(error){
+                    console.log("失敗",error);
+                    alert("位置情報の取得に失敗しました。");
+                }
+            }
+            //天気のコードを文字に変換、雲の量を文字に変換
+            function changeWeathercode(code){
+                if(code === 0 || code === 1)return"☀️晴れ";
+                if(code === 2) return "⛅晴れ時々曇り";
+                if(code === 3) return "☁️曇り";
+                if(code === 48 || code === 45)return"🌫️霧";
+                if(code === 51 || code === 53 || code === 55)return"🌦️霧雨";
+                if(code === 61 || code === 63 || code === 65)return"🌧️雨";
+                if(code === 71 || code === 73 || code === 75)return"⛄️雪";
+                if(code === 80 || code === 81 || code === 82)return"🌦️にわか雨";
+                if(code === 95)return"⛈️雷雨";
+            }
+            function starCatch(code){
+                if(0 <= code && code <= 20)return"よく見える";
+                if(21 <= code && code <= 50)return"見える"
+                if(51 <= code && code <= 80)return"見えにくい";
+                if(81 <= code && code <= 100)return"見えない";
+            }
+            //日付により一時間ごとの天気表示
+            function showAll(hourly,date){
+                hourly.time.forEach((item,i) => {
+                    if(item.split("T")[0] !== date)return;
+                    const li = document.createElement("li");
+                    const weather = changeWeathercode(hourly.weathercode[i]);
+                    const temp = hourly.temperature_2m[i];
+                    const hour = item.split("T")[1];
+                    li.innerHTML = `<span class="time">${hour}</span>
+                                    <span class="tempr">${temp}</span>
+                                    <span class="weath">${weather}</span>`;
+                    DOM.list.appendChild(li)            
+                });
+            }
+            //１週間の天気
+            function weeks(hourly){
+                const weeks = [];
+                for (let i = 0; i < 7; i++) {
+                    const today = new Date();
+                    today.setDate(today.getDate() + i);
+                    const week = today.toISOString().split("T")[0];
+                    weeks.push(week); 
+                }
+                weeks.forEach(week => {
+                    const index = hourly.time.indexOf(week + "T12:00");
+                    if(index !== -1){
+                        const li = document.createElement("li");
+                        const weatherWeeks = changeWeathercode(hourly.weathercode[index]);
+                        const temp = hourly.temperature_2m[index];
+                        li.innerHTML = `<span class="time2">${week}</span>
+                                        <span class="tempr2">${temp}</span>
+                                        <span class="weathWeeks">${weatherWeeks}</span>`
+                        DOM.list.appendChild(li);
+                    }
+                })
+            }
+            //夜の星が見えるかどうか判定、今日、明日、明後日
+            function nightcloudCover(hourly,date){
+                const index = hourly.time.indexOf(date + "T20:00");
+                if(index !== -1){
+                    const nightStar = starCatch(hourly.cloudcover[index]);
+                    DOM.nightStar.textContent = "今夜の星空: " + nightStar;
+                }
+            }
+            main();
+        </script>
+    </body>
+</html>

@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Star app</title>
+        <link rel="stylesheet" href="style2.css">
     </head>
     <body>
         <canvas id="sky" width="800" height="500"></canvas>
@@ -21,7 +22,6 @@
         let time_countdown = 45;
         let stars = [];
         const pen = DOM.canvas.getContext("2d");
-        DOM.canvas.style.background = "black";
         function createStars(){
             for (let i = 0; i < 50; i++) {
                 const x = Math.random() * DOM.canvas.width;
