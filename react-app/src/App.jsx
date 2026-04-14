@@ -1,7 +1,7 @@
-import Memo from "./Memo";
+import Todo from "./todo5";
 function App(){
   return(
-    <Memo />
+    <Todo />
   )
 }
 export default App;
