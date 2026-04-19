@@ -1,0 +1,10 @@
+.taskText{
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+.taskText:hover{
+    transform: scale(1.05) translateX(5px);
+    filter: brightness(1.5);
+}

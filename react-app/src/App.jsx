@@ -1,7 +1,7 @@
-import Todo from "./todo5";
+import Stargame from "./star_game3";
 function App(){
   return(
-    <Todo />
+    <Stargame />
   )
 }
 export default App;
