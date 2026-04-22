@@ -1,4 +1,4 @@
-import Stargame from "./star_game3";
+import Stargame from "./star_game4";
 function App(){
   return(
     <Stargame />
