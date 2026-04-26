@@ -1,5 +1,6 @@
 import { useState,useEffect,useRef } from "react";
 import Seasonbuttons from "./SeasonButtons";
+import styles from "./Constellation.module.css";
 const stars = [{
     name:"オリオン座",
     season: "冬",//実際は冬だが表示できるように通年に変えた
@@ -47,6 +48,8 @@ function Constellation(){
     const [season,setSeason] = useState(getautoSeason());
     const [currentstar,SetcurrentStar] = useState(null);
     const [location,setLocation] = useState("");
+    const [error,setError] = useState("");
+    const [loading,setloading] = useState(false)
     const refcanvas = useRef(null);
     const refBackground = useRef([]);
     const filtered = stars.filter(star => star.season === season || star.season === "通年");
@@ -82,6 +85,7 @@ function Constellation(){
             });
         }
         async function Location() {
+            setloading(true);
             try{
                 const locationDate = await getLocation();
                 const lat = locationDate.coords.latitude;
@@ -91,8 +95,10 @@ function Constellation(){
                 setLocation(result.address?.city || result.address?.town || "現在地");
             }catch(error){
                 console.log("失敗",error);
-                alert("位置情報の取得に失敗");
+                setError("位置情報の取得に失敗しました。");
+                
             }
+            setloading(false);
         }
         createStar();
         drawStars();
@@ -128,21 +134,23 @@ function Constellation(){
         });      
     },[currentstar]);
     return(
-        <div>
-            <h1>星座アプリ</h1>
-            <h2>{location} から見える星</h2>
-            <canvas ref={refcanvas} width={1000} height={800}></canvas>
+        <div className={styles.container}>
+            <h1 className={styles.title}>星座アプリ</h1>
+            <h2 className={styles.location}>{location} から見える星</h2>
+            <h3>{loading?"読み込み中・・・":null}</h3>
+            {error && !loading && <p style={{color:"red", fontWeight:"bold"}}>⚠️{error}</p>}
             <Seasonbuttons
             setSeason={setSeason}
             />
             {filtered.map(star => (
                 <div key={star.name}>
-                    <p>{star.name}</p>
-                    {currentstar === star && <p>{star.description}</p>}
+                    <p className={styles.starname}>{star.name}</p>
+                    {currentstar === star && <p className={styles.Description}>{star.description}</p>}
                     <button onClick={() => SetcurrentStar(star === currentstar?null:star)}>{currentstar === star?"閉じる":"特徴表示"}</button>
                 </div>
 
             ))}
+            <canvas className={styles.starcard} ref={refcanvas} width={1000} height={800}></canvas>
         </div>
     )
 }

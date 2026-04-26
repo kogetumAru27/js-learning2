@@ -1,0 +1,67 @@
+:root {
+    --night-navy: #0a192f;       /* 深い夜空の紺色 */
+    --star-gold: #fcc419;        /* 輝く星の金色 */
+    --moon-white: #f8f9fa;       /* 月明かりのような白 */
+    --nebula-purple: #4d3d8d;    /* 星雲のような紫 */
+  }
+  body{
+    background-color: var(--night-navy);
+    margin: 0;
+  }
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+.title{
+    color: var(--star-gold);
+    font-size: 32px;
+    letter-spacing: 6px;
+    text-shadow: 0 0 10px #4a90e2;
+}
+.status{
+    display: flex;
+    gap: 40px;
+    color: var(--moon-white);
+    font-size: 20px;
+    margin: 10px 0;
+}
+.startscreen{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 100px;
+}
+.description{
+    color: var(--moon-white);
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+.startbtn{
+    padding: 16px 48px;
+    font-size: 20px;
+    border: 2px solid var(--star-gold);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--star-gold);
+    cursor: pointer;
+    letter-spacing: 4px;
+    transition: all 0.3s;
+}
+.startbtn:hover{
+    background: var(--star-gold);
+    color: var(--night-navy);
+}
+.time{
+    color: var(--star-gold);
+    font-size: 24px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--star-gold);
+}
+.score{
+    color: var(--moon-white);
+    font-size: 24px;
+    letter-spacing: 2px;
+}

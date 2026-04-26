@@ -1,12 +1,16 @@
 import { useState,useEffect,useRef } from "react";
 import GameStatus from "./GameStatus";
+import styles from "./Stargame.module.css";
 function Stargame(){
     const [stars,setStar] = useState([]);
     const [count,setCount] = useState(0);
     const [timer,setTimer] = useState(45);
     const [gameover,setGameover] = useState(false);
     const Refcanvas = useRef(null);
+    const [started,setStarted] = useState(false);
+    const refCount = useRef(0)
     useEffect(() => {
+        if(!started)return
         const canvas = Refcanvas.current;
         const pen = canvas.getContext("2d");
         canvas.style.background = "black";
@@ -68,7 +72,7 @@ function Stargame(){
                     if(t <= 0){
                         setGameover(true);
                         clearInterval(id);
-                        alert("ゲーム終了!score: " + count);
+                        alert("ゲーム終了!score: " + refCount.current);
                         return 0;
                     }
                     return t - 1
@@ -102,7 +106,10 @@ function Stargame(){
             newstars.push(createnewStar());
             setStar(newstars)
             drawStar();
-            setCount(co => co + score);
+            setCount(co => {
+                refCount.current = co + score;
+                return co + score;
+            })
         }
         function createnewStar(){
             return{
@@ -120,10 +127,29 @@ function Stargame(){
         loop();
         time();
 
-    },[])
+    },[started])
+    if(!started)return(
+        <div className={styles.startscreen} >
+            <h1 className={styles.title}>⭐️星のゲーム⭐️</h1>
+            <p className={styles.description}>星をクリックして点数を稼ごう!</p>
+            <button className={styles.startbtn} onClick={() => setStarted(true)}>ゲームスタート</button>
+        </div>
+    );
+    if(gameover)return(
+        <div className={styles.startscreen}>
+        <h1 style={{color:"white"}}>ゲーム終了!</h1>
+        <button className={styles.startbtn} onClick={() => {
+            setStarted(false);
+            setGameover(false);
+            setTimer(45);
+            setCount(0)
+            
+        }}>もう一度</button>
+        </div>
+    )
     return(
-        <div>
-            <h1>星のゲーム</h1>
+        <div className={styles.container} >
+            <h1 className={styles.title}>星のゲーム</h1>
             <canvas ref={Refcanvas} width={800} height={500}></canvas>
             <GameStatus
             timer = {timer}

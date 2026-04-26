@@ -1,0 +1,73 @@
+:root {
+    --night-navy: #0a192f;
+    --star-gold: #fcc419;
+    --moon-white: #f8f9fa;
+}
+body {
+    background-color: var(--night-navy);
+    margin: 0;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+.title{
+    color: var(--star-gold);
+    font-size: 32px;
+    letter-spacing: 6px;
+    text-shadow: 0 0 10px #4a90e2;
+}
+.location {
+    color: var(--moon-white);
+    font-size: 18px;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+}
+.Seasonbuttons{
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+}
+.Seasonbutton{
+    margin-top: 0;
+    padding: 8px 20px;
+    border: 2px solid var(--star-gold);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--star-gold);
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 10px;
+}
+.Seasonbutton:hover{
+    background: var(--star-gold);
+    color: var(--night-navy);
+}
+.starcord{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--moon-white);
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    width: 300px;
+}
+.Description{
+    color: var(--moon-white);
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: 2px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-top: 4px;
+}
+.starname{
+    color: var(--star-gold);
+    letter-spacing: 2px;
+    font-size: 16px;
+}

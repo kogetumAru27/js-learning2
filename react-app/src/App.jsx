@@ -1,7 +1,7 @@
-import Stargame from "./star_game4";
+import Weather from "./weatherRea3";
 function App(){
   return(
-    <Stargame />
+    <Weather />
   )
 }
 export default App;

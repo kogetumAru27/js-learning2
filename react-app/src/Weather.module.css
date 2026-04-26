@@ -1,0 +1,87 @@
+:root {
+    --sky-blue: #4a90e2;
+    --light-blue: #e8f4fd;
+    --dark-blue: #2c5f8a;
+    --white: #ffffff;
+    --gray: #666666;
+}
+body{
+    background-color: var(--light-blue);
+    margin: 0;
+}
+.container{
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.title{
+    text-align: center;
+    color: var(--dark-blue);
+    font-size: 32px;
+    letter-spacing: 4px;
+}
+.CurrentWeather{
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+.hourlyItem{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--light-blue);
+    background: var(--white);
+}
+.hourlyItem:first-child{
+    border-radius: 12px 12px 0 0;
+}
+.hourlyItem:last-child{
+    border-bottom: none;
+    border-radius: 0 0 12px 12px;
+}
+.hourlylist{
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+    border-radius: 12px;
+}
+.btns{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    justify-content: center;
+}
+.btn{
+    padding: 8px 20px;
+    border: 2px solid var(--sky-blue);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--sky-blue);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.btn:hover{
+    background: var(--sky-blue);
+    color: var(--white);
+}
+.btnActive{
+    background: var(--sky-blue);
+    color: var(--white);
+}
+.weatherCard{
+    background: var(--light-blue);
+    border-radius: 12px;
+    padding: 12px 20px;
+    text-align: center;
+    color: var(--dark-blue);
+    font-size: 16px;
+    flex: 1;
+    white-space: nowrap;
+}

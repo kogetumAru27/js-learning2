@@ -1,8 +1,9 @@
+import styles from "./Stargame.module.css";
 function GameStatus({count,timer}){
     return(
-        <div>
-            <p>time:{timer}</p>
-            <p>score:{count}</p>
+        <div className={styles.status}>
+            <p className={styles.time}>time:⏳{timer}</p>
+            <p className={styles.count}>score:⭐️{count}</p>
         </div>
 
     )

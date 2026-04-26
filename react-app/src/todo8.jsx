@@ -1,5 +1,6 @@
 import { useState,useEffect } from "react";
-import TodoItem from "./todoItem8";
+import TodoItem from "./todoItem8"; 
+import styles from "./Todo.module.css";
 function Todo(){
     const [todos,setTodo] = useState(() => {
         const save = localStorage.getItem("todos");
@@ -51,35 +52,44 @@ function Todo(){
     const comp = todos.filter(to => to.done).length;
     const incomp = total - comp;
     const deletecomp = todos.filter(to => !to.done);
+    const addbtn = () => {
+        if(text.trim() === "")return;
+        setTodo([...todos,{id:Date.now(),text:text,done:false,priority:priority,deadline:deadline}]);
+        setText("");
+    }
+    const textfun = (e) => {     
+        if(e.key === "Enter"){
+        if(e.nativeEvent.isComposing)return;
+        if(text.trim() === "")return;
+        setTodo([...todos,{id:Date.now(),text:text,done:false,priority:priority,deadline:deadline}]);
+        setText("");}}
     return(
-        <div>
-            <h1>Todo</h1>
-            <input type="text" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => {
-                if(e.key === "Enter"){
-                if(e.nativeEvent.isComposing)return;
-                if(text.trim() === "")return;
-                setTodo([...todos,{id:Date.now(),text:text,done:false,priority:priority,deadline:deadline}]);
-                setText("");}
-            }} />
-            <button onClick={() => {
-                if(text.trim() === "")return;
-                setTodo([...todos,{id:Date.now(),text:text,done:false,priority:priority,deadline:deadline}]);
-                setText("");
-            }}>追加</button>
+        <div className={styles.container}>
+            <h1 className={styles.title}>Todo</h1>
+            <div className={styles.inputArea}>
+            <input type="text" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => {textfun(e)}} />
             <input type="text" value={search} placeholder="検索" onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <button className={styles.addbtn} onClick={() => addbtn()}>追加</button>
+            <div className={styles.buttons}>
             <button onClick={() => setfilter("all")}>全て</button>
             <button onClick={() => setfilter("complete")}>完了</button>
             <button onClick={() => setfilter("incomplete")}>未完了</button>
             <button onClick={() => setTodo(deletecomp)}>完了タスク削除</button>
+            </div>
+            <div className={styles.counter}>
             <p>全て:{total}</p>
             <p>完了:{comp}</p>
             <p>未完了:{incomp}</p>
-            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+            </div>
+            <div className={styles.controls}>
+            <select className={styles.select} value={priority} onChange={(e) => setPriority(e.target.value)}>
                 <option value="high">高</option>
                 <option value="middle">中</option>
                 <option value="low">低</option>
             </select>
-            <input type="date" value={deadline} onChange={(e) => setdeadline(e.target.value)}/>
+            <input type="date" className={styles.date} value={deadline} onChange={(e) => setdeadline(e.target.value)}/>
+            </div>
             {searchWord.map(todo => (
                 <TodoItem 
                 key={todo.id}

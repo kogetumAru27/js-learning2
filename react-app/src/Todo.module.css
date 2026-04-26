@@ -1,0 +1,108 @@
+:root {
+    --night-navy: #0a192f;       /* 深い夜空の紺色 */
+    --star-gold: #fcc419;        /* 輝く星の金色 */
+    --moon-white: #f8f9fa;       /* 月明かりのような白 */
+    --nebula-purple: #4d3d8d;    /* 星雲のような紫 */
+  }
+.container{
+    max-width: 600px;
+    margin:0 auto;
+    padding: 20px;
+}
+.buttons button{
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--nebula-purple);
+    color: white;
+    transition: background-color 0.2s;
+    margin: 10px;
+}
+.buttons button:hover{
+    background-color: #357abd;
+}
+.addbtn {
+    border-radius: 8px;
+    border: none;
+    color: white;
+    background-color: var(--nebula-purple);  
+    padding: 8px 16px;
+}
+
+.addbtn:hover {
+    background-color: #219a52;
+}
+@keyframes fadeIn{
+    from{opacity: 0;transform: translateY(-10px);}
+    to{opacity: 1;transform: translateY(0);}
+}
+.todoItem{
+    animation: fadeIn 0.3s ease;
+    border: 1px solid var(--moon-white);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+.removing{
+    animation: fadeOut 0.3s ease forwards;
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+body{
+    background-color: var(--night-navy);
+}
+.title {
+    text-align: center;
+    color: var(--star-gold);
+    font-size: 32px;
+    letter-spacing: 4px;
+}
+.inputArea {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.inputArea input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+.inputArea input:focus {
+    border-color: var(--moon-white);
+}
+.counter{
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+    color: var(--star-gold);
+    font-size: 16px;
+}
+.controls{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    justify-content: center;
+}
+.select{
+    padding: 8px 12px;
+    border:1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+}
+.date{
+    padding:8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
