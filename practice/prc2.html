@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>practice</title>
+    </head>
+    <body>
+        <input type="text" class="input">
+        <button class="btn">追加</button>
+        <ul class="list"></ul>
+    </body>
+    <script>
+        const DOM ={
+            input:document.querySelector(".input"),
+            btn:document.querySelector(".btn"),
+            list : document.querySelector(".list")
+        }
+        DOM.btn.addEventListener("click",() => {
+            if(DOM.input.value.trim() === "")return;
+            const li = document.createElement("li");
+            const button = document.createElement("button");
+            const span = document.createElement("span");
+            span.textContent = DOM.input.value;
+            button.textContent = "削除";
+            button.addEventListener("click",() => {
+                li.remove();
+            })
+            li.append(span,button);
+            DOM.list.appendChild(li);
+        })
+    </script>
+</html>

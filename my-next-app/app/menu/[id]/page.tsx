@@ -11,7 +11,7 @@ export default async function Cafe(){
             <h1>天体カフェメニュー</h1>
             {menus.map(menu => (
                 <div key={menu.id}>
-                    <Link href={`/menu/${menu.id}`}>{menu.id}</Link>
+                    <Link href={`/menu/${menu.id}`}>{menu.name}</Link>
                     <p>{menu.price}円</p>
                 </div>
             ))}
