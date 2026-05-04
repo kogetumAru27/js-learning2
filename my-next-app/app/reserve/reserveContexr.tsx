@@ -1,24 +1,23 @@
-type Menu ={
-    title:string,
-    price:number
+"use client";
+import { createContext,useState,useContext, } from "react";
+type Props = {
+    count:number,
+    text:string,
+    setText:(t:string) => void,
+    setCount:(c:number) => void,
 }
-function MenuItem({title,price}:Menu){
+const reserveText = createContext<Props | null>(null);
+export function Prc({children}:{children:React.ReactNode}){
+    const [text,setText] = useState("");
+    const [count,setCount] = useState(0);
     return(
-        <p>本日のメニュー{title}-{price}</p>
-    );
+        <reserveText.Provider value={{count,text,setCount,setText}}>
+            {children}
+        </reserveText.Provider>
+    )
 }
-export default function Main(){
-    const menu = [
-    {  title: "月光ブレンド", price: 500 },
-    {  title: "流星ソーダ", price: 650 },
-    {  title: "銀河ケーキ", price: 800 },
-];
-return(
-    <>
-    {menu.map(me => (
-        <MenuItem key={me.title} title={me.title} price={me.price}/>
-    ))}
-    </>
-
-)
+export function PrcCHild(){
+    const test = useContext(reserveText);
+    if(!test)throw new Error("error");
+    return test;
 }

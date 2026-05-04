@@ -5,6 +5,7 @@ import Card from '@/components/Card';
 import Comp from'@/components/text';
 import Count from'@/components/Counter';
 import Effect from '@/components/Effect';
+import UserList from '@/components/UserList';
 type MenuItem = {
   id: number;
   name: string;
@@ -30,10 +31,6 @@ export default function Page(){
   return(
     <div>
       <h1>本日のメニュー</h1>
-      <MeNu  menu={todayMenu} />
-      <Comp />
-      <Count />
-      <Effect/>
     </div>
   )
 }

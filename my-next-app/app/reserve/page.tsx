@@ -1,20 +1,8 @@
 "use client";
-type Props ={
-    count :number,
-    text:string,
-    setCount: (c: number) => void;
-    setText: (t: string) => void;
-}
-type ConfirmProps = {
-    count: number;
-    text: string;
-}
-type Submit ={
-    issubmit:boolean,
-    setsubmit:(s:boolean) => void
-}
-import { useState } from "react";
-function Comp({count,text,setCount,setText}:Props){
+import { ReserveProvider} from './context/context';
+import { useReserve } from './context/context';
+function Comp(){
+    const { count, text, setCount, setText } = useReserve()
     function pulas(){
         setCount(count + 1);
     }
@@ -31,7 +19,8 @@ function Comp({count,text,setCount,setText}:Props){
     );
 
 }
-function ReserveConfirm({text,count,}:ConfirmProps){
+function ReserveConfirm(){
+    const { count, text} = useReserve()
     return(
         <>
         <h1>予約確認</h1>
@@ -40,7 +29,8 @@ function ReserveConfirm({text,count,}:ConfirmProps){
     )
 
 }
-function Kidssubmit({issubmit,setsubmit}:Submit){
+function Kidssubmit(){
+    const {issubmit,setsubmit} = useReserve()
     function handlesubmit(){
         setsubmit(true);
     }
@@ -49,14 +39,11 @@ function Kidssubmit({issubmit,setsubmit}:Submit){
     );
 }
 export default function Main(){
-    const [count,setCount] = useState(0);
-    const [text,setText] =useState("");
-    const [issubmit,setsubmit] = useState(false)
     return(
-        <>
-        <Comp count={count} text={text} setCount={setCount} setText={setText}/>
-        <ReserveConfirm count={count} text={text}/>
-        <Kidssubmit  issubmit={issubmit} setsubmit={setsubmit}/>
-        </>
+        <ReserveProvider>
+        <Comp />
+        <ReserveConfirm />
+        <Kidssubmit />
+        </ReserveProvider>
     )
 }

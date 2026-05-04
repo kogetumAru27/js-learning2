@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link"
+import Providers from "./Providers"
+import LoginButton from "../components/LoginButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +31,17 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Providers>
         <header className="bg-blue-500 text-white p-4">
           <nav className="flex gap-8 max-w-4xl mx-auto">
             <Link href="/">ホーム</Link>
             <Link href="/about">About</Link>
+            <LoginButton />
           </nav>
         </header>
-        {children}</body>
+        {children}
+        </Providers>
+        </body>
         <footer className="bg-gray-800 text-white text-center p-4 mt-auto">
         <p>© 2025 My Portfolio</p>
         </footer>
